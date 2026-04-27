@@ -10,6 +10,7 @@ anthropic>=0.18.0
 openai>=1.12.0
 google-generativeai>=0.3.0  # Google Gemini 지원
 groq>=0.4.0  # Groq API 지원
+litellm>=1.40.0  # LiteLLM 프록시 서버 지원 (NVIDIA API 등)
 
 # LangGraph (파이프라인 오케스트레이션)
 langgraph>=0.0.20

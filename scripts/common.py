@@ -227,6 +227,19 @@ class MultiAIClient:
                 "model": os.getenv("OLLAMA_MODEL", "llama2"),
                 "supports_system_prompt": True
             }
+        
+        # LiteLLM 프록시 서버 (NVIDIA API 등)
+        if os.getenv("LITELLM_BASE_URL"):
+            try:
+                from litellm import completion
+                self.providers["litellm"] = {
+                    "client": completion,
+                    "base_url": os.getenv("LITELLM_BASE_URL"),
+                    "model": os.getenv("LITELLM_MODEL", "glm-plan"),
+                    "supports_system_prompt": True
+                }
+            except ImportError:
+                print("[WARNING] LiteLLM 라이브러리가 설치되지 않았습니다.")
     
     def get_available_providers(self) -> List[str]:
         """
@@ -276,6 +289,8 @@ class MultiAIClient:
             return self._generate_groq(provider_info, prompt, system_prompt, **kwargs)
         elif self.current_provider == "ollama":
             return self._generate_ollama(provider_info, prompt, system_prompt, **kwargs)
+        elif self.current_provider == "litellm":
+            return self._generate_litellm(provider_info, prompt, system_prompt, **kwargs)
         
         raise ValueError(f"지원되지 않는 프로바이더: {self.current_provider}")
     
@@ -363,6 +378,23 @@ class MultiAIClient:
             return response.json().get("response", "")
         else:
             raise Exception(f"Ollama API 오류: {response.status_code}")
+    
+    def _generate_litellm(self, provider_info: dict, prompt: str, system_prompt: str, **kwargs) -> str:
+        """LiteLLM 프록시 서버 API 호출"""
+        messages = []
+        if system_prompt:
+            messages.append({"role": "system", "content": system_prompt})
+        messages.append({"role": "user", "content": prompt})
+        
+        response = provider_info["client"](
+            model=provider_info["model"],
+            messages=messages,
+            api_base=provider_info["base_url"],
+            max_tokens=kwargs.get("max_tokens", 8192),
+            temperature=kwargs.get("temperature", 0.7)
+        )
+        
+        return response.choices[0].message.content
 
 # ==============================================================================
 # AI 클라이언트 인스턴스 (전역)
