@@ -115,154 +115,154 @@ services:
   # Flask 웹 앱 - 파이프라인 에디터 (n8n 스타일)
   # -----------------------------------------------------------------------------
   pipeline-editor:
-  build:
-  context: .
-  dockerfile: Dockerfile.webapp
-  container_name: blog_pipeline_editor
-  restart: unless-stopped
-  environment:
-  - FLASK_APP=web_review/pipeline_editor.py
-  - FLASK_ENV=production
-  - AI_PROVIDER=${AI_PROVIDER:-claude}
-  - CLAUDE_API_KEY=${CLAUDE_API_KEY}
-  - OPENAI_API_KEY=${OPENAI_API_KEY}
-  - GEMINI_API_KEY=${GEMINI_API_KEY}
-  - GROQ_API_KEY=${GROQ_API_KEY}
-  - LITELLM_BASE_URL=${LITELLM_BASE_URL}
-  - LITELLM_MODEL=${LITELLM_MODEL}
-  - WP_SITE_URL=${WP_SITE_URL}
-  - WP_API_USERNAME=${WP_API_USERNAME}
-  - WP_API_PASSWORD=${WP_API_PASSWORD}
-  - SECRET_KEY=${SECRET_KEY:-pipeline-editor-secret-key}
-  - TZ=Asia/Seoul
-  volumes:
-  - ./config:/app/config
-  - ./logs:/app/logs
-  - ./output:/app/output
-  ports:
-  - "5002:5002"
-  networks:
-  - blog_network
-  extra_hosts:
-  - "host.docker.internal:host-gateway"
-  depends_on:
-  - wordpress
-  healthcheck:
-  test: ["CMD", "curl", "-f", "http://localhost:5002/"]
-  interval: 30s
-  timeout: 10s
-  retries: 3
+    build:
+      context: .
+      dockerfile: Dockerfile.webapp
+    container_name: blog_pipeline_editor
+    restart: unless-stopped
+    environment:
+      - FLASK_APP=web_review/pipeline_editor.py
+      - FLASK_ENV=production
+      - AI_PROVIDER=${AI_PROVIDER:-claude}
+      - CLAUDE_API_KEY=${CLAUDE_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - LITELLM_BASE_URL=${LITELLM_BASE_URL}
+      - LITELLM_MODEL=${LITELLM_MODEL}
+      - WP_SITE_URL=${WP_SITE_URL}
+      - WP_API_USERNAME=${WP_API_USERNAME}
+      - WP_API_PASSWORD=${WP_API_PASSWORD}
+      - SECRET_KEY=${SECRET_KEY:-pipeline-editor-secret-key}
+      - TZ=Asia/Seoul
+    volumes:
+      - ./config:/app/config
+      - ./logs:/app/logs
+      - ./output:/app/output
+    ports:
+      - "5002:5002"
+    networks:
+      - blog_network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - wordpress
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5002/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
   
   # -----------------------------------------------------------------------------
   # Flask 웹 앱 - 관리자 대시보드
   # -----------------------------------------------------------------------------
   admin-dashboard:
-  build:
-  context: .
-  dockerfile: Dockerfile.webapp
-  container_name: blog_admin_dashboard
-  restart: unless-stopped
-  environment:
-  - FLASK_APP=web_review/admin.py
-  - FLASK_ENV=production
-  - AI_PROVIDER=${AI_PROVIDER:-claude}
-  - CLAUDE_API_KEY=${CLAUDE_API_KEY}
-  - OPENAI_API_KEY=${OPENAI_API_KEY}
-  - GEMINI_API_KEY=${GEMINI_API_KEY}
-  - GROQ_API_KEY=${GROQ_API_KEY}
-  - LITELLM_BASE_URL=${LITELLM_BASE_URL}
-  - LITELLM_MODEL=${LITELLM_MODEL}
-  - WP_SITE_URL=${WP_SITE_URL}
-  - WP_API_USERNAME=${WP_API_USERNAME}
-  - WP_API_PASSWORD=${WP_API_PASSWORD}
-  - SECRET_KEY=${SECRET_KEY:-admin-secret-key}
-  - TZ=Asia/Seoul
-  volumes:
-  - ./config:/app/config
-  - ./logs:/app/logs
-  - ./output:/app/output
-  ports:
-  - "5000:5000"
-  networks:
-  - blog_network
-  extra_hosts:
-  - "host.docker.internal:host-gateway"
-  depends_on:
-  - wordpress
-  healthcheck:
-  test: ["CMD", "curl", "-f", "http://localhost:5000/admin"]
-  interval: 30s
-  timeout: 10s
-  retries: 3
+    build:
+      context: .
+      dockerfile: Dockerfile.webapp
+    container_name: blog_admin_dashboard
+    restart: unless-stopped
+    environment:
+      - FLASK_APP=web_review/admin.py
+      - FLASK_ENV=production
+      - AI_PROVIDER=${AI_PROVIDER:-claude}
+      - CLAUDE_API_KEY=${CLAUDE_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - LITELLM_BASE_URL=${LITELLM_BASE_URL}
+      - LITELLM_MODEL=${LITELLM_MODEL}
+      - WP_SITE_URL=${WP_SITE_URL}
+      - WP_API_USERNAME=${WP_API_USERNAME}
+      - WP_API_PASSWORD=${WP_API_PASSWORD}
+      - SECRET_KEY=${SECRET_KEY:-admin-secret-key}
+      - TZ=Asia/Seoul
+    volumes:
+      - ./config:/app/config
+      - ./logs:/app/logs
+      - ./output:/app/output
+    ports:
+      - "5000:5000"
+    networks:
+      - blog_network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - wordpress
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/admin"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
   
   # -----------------------------------------------------------------------------
   # Flask 웹 앱 - 검토 대시보드
   # -----------------------------------------------------------------------------
   review-dashboard:
-  build:
-  context: .
-  dockerfile: Dockerfile.webapp
-  container_name: blog_review_dashboard
-  restart: unless-stopped
-  environment:
-  - FLASK_APP=web_review/app.py
-  - FLASK_ENV=production
-  - AI_PROVIDER=${AI_PROVIDER:-claude}
-  - CLAUDE_API_KEY=${CLAUDE_API_KEY}
-  - OPENAI_API_KEY=${OPENAI_API_KEY}
-  - GEMINI_API_KEY=${GEMINI_API_KEY}
-  - GROQ_API_KEY=${GROQ_API_KEY}
-  - LITELLM_BASE_URL=${LITELLM_BASE_URL}
-  - LITELLM_MODEL=${LITELLM_MODEL}
-  - WP_SITE_URL=${WP_SITE_URL}
-  - WP_API_USERNAME=${WP_API_USERNAME}
-  - WP_API_PASSWORD=${WP_API_PASSWORD}
-  - SECRET_KEY=${SECRET_KEY:-review-secret-key}
-  - TZ=Asia/Seoul
-  volumes:
-  - ./config:/app/config
-  - ./logs:/app/logs
-  - ./output:/app/output
-  ports:
-  - "5001:5000"
-  networks:
-  - blog_network
-  extra_hosts:
-  - "host.docker.internal:host-gateway"
-  depends_on:
-  - wordpress
-  healthcheck:
-  test: ["CMD", "curl", "-f", "http://localhost:5000/"]
-  interval: 30s
-  timeout: 10s
-  retries: 3
+    build:
+      context: .
+      dockerfile: Dockerfile.webapp
+    container_name: blog_review_dashboard
+    restart: unless-stopped
+    environment:
+      - FLASK_APP=web_review/app.py
+      - FLASK_ENV=production
+      - AI_PROVIDER=${AI_PROVIDER:-claude}
+      - CLAUDE_API_KEY=${CLAUDE_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - LITELLM_BASE_URL=${LITELLM_BASE_URL}
+      - LITELLM_MODEL=${LITELLM_MODEL}
+      - WP_SITE_URL=${WP_SITE_URL}
+      - WP_API_USERNAME=${WP_API_USERNAME}
+      - WP_API_PASSWORD=${WP_API_PASSWORD}
+      - SECRET_KEY=${SECRET_KEY:-review-secret-key}
+      - TZ=Asia/Seoul
+    volumes:
+      - ./config:/app/config
+      - ./logs:/app/logs
+      - ./output:/app/output
+    ports:
+      - "5001:5000"
+    networks:
+      - blog_network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - wordpress
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
   
   # -----------------------------------------------------------------------------
   # Nginx 리버스 프록시 + SSL 서비스
   # -----------------------------------------------------------------------------
   nginx:
-  image: nginx:alpine
-  container_name: blog_nginx
-  restart: unless-stopped
-  volumes:
-  - ./nginx/conf.d:/etc/nginx/conf.d
-  - ./nginx/ssl:/etc/nginx/ssl
-  - wordpress_data:/var/www/html:ro
-  ports:
-  - "80:80"
-  - "443:443"
-  depends_on:
-  - wordpress
-  - pipeline-editor
-  - admin-dashboard
-  - review-dashboard
-  networks:
-  - blog_network
-  healthcheck:
-  test: ["CMD", "wget", "-q", "--spider", "http://localhost/health"]
-  interval: 30s
-  timeout: 10s
-  retries: 3
+    image: nginx:alpine
+    container_name: blog_nginx
+    restart: unless-stopped
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./nginx/ssl:/etc/nginx/ssl
+      - wordpress_data:/var/www/html:ro
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - wordpress
+      - pipeline-editor
+      - admin-dashboard
+      - review-dashboard
+    networks:
+      - blog_network
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
 # ==============================================================================
 # 볼륨 정의 (데이터 영속성)
