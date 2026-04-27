@@ -1,0 +1,40 @@
+# ==============================================================================
+# AI 블로그 자동화 시스템 - Web App Dockerfile
+# ==============================================================================
+# 이 파일의 역할: Flask 웹 앱(파이프라인 에디터, 관리자 대시보드)을 Docker 컨테이너로 구성
+# ==============================================================================
+
+FROM python:3.11-slim
+
+# 작업 디렉토리 설정
+WORKDIR /app
+
+# 시스템 의존성 설치
+RUN apt-get update && apt-get install -y \
+    curl \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+# Python 의존성 복사 및 설치
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# 프로젝트 파일 복사
+COPY . .
+
+# 로그 디렉토리 생성
+RUN mkdir -p logs output
+
+# 환경변수 설정
+ENV PYTHONUNBUFFERED=1
+ENV FLASK_APP=web_review/app.py
+
+# 포트 설정
+EXPOSE 5000 5001 5002
+
+# 헬스체크
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:5000/health || exit 1
+
+# 실행 명령
+CMD ["python", "-c", "from web_review.app import app; app.run(host='0.0.0.0', port=5000)"]

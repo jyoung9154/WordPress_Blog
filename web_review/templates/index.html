@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 블로그 검토 시스템</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 0;
+            margin-bottom: 30px;
+            border-radius: 0 0 20px 20px;
+        }
+        header h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        header p {
+            opacity: 0.9;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .stat-card h3 {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+        .stat-card .value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+        .posts-list {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .post-item {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.2s;
+        }
+        .post-item:last-child {
+            border-bottom: none;
+        }
+        .post-item:hover {
+            background: #f9f9f9;
+        }
+        .post-info h3 {
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+            color: #333;
+        }
+        .post-meta {
+            display: flex;
+            gap: 15px;
+            font-size: 0.85rem;
+            color: #666;
+        }
+        .post-meta span {
+            display: flex;
+            align-items: center;
+        }
+        .seo-score {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+        .btn-secondary:hover {
+            background: #d0d0d0;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+        .empty-state h2 {
+            margin-bottom: 10px;
+            color: #999;
+        }
+        .nav {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .nav a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 5px;
+            transition: background 0.2s;
+        }
+        .nav a:hover {
+            background: rgba(255,255,255,0.3);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>🤖 AI 블로그 검토 시스템</h1>
+            <p>생성된 포스트를 검토하고 WordPress에 발행하세요</p>
+            <div class="nav">
+                <a href="/">검토 대기열</a>
+                <a href="/logs">검토 로그</a>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="stats" id="stats">
+            <div class="stat-card">
+                <h3>검토 대기</h3>
+                <div class="value" id="pending-count">{{ posts|length }}</div>
+            </div>
+            <div class="stat-card">
+                <h3>오늘 승인</h3>
+                <div class="value" id="today-approved">-</div>
+            </div>
+            <div class="stat-card">
+                <h3>이번 달 승인</h3>
+                <div class="value" id="monthly-approved">-</div>
+            </div>
+            <div class="stat-card">
+                <h3>전체 성공률</h3>
+                <div class="value" id="success-rate">-</div>
+            </div>
+        </div>
+
+        <div class="posts-list">
+            {% if posts %}
+                {% for post in posts %}
+                <div class="post-item" data-filename="{{ post.filename }}">
+                    <div class="post-info">
+                        <h3>{{ post.title }}</h3>
+                        <div class="post-meta">
+                            <span>🔑 {{ post.keyword }}</span>
+                            <span>📁 {{ post.category }}</span>
+                            <span>⏱️ {{ post.estimated_read_time }}분</span>
+                            {% if post.seo_score != 'N/A' %}
+                            <span class="seo-score">📊 SEO {{ post.seo_score }}/100</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="post-actions">
+                        <button class="btn btn-primary" onclick="viewPost('{{ post.filename }}')">검토하기</button>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <h2>📭 검토할 포스트가 없습니다</h2>
+                    <p>먼저 'python scripts/generate_post.py --random'으로 포스트를 생성해주세요.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        // 통계 데이터 로드
+        fetch('/stats')
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('monthly-approved').textContent = data.monthly_approved;
+                document.getElementById('success-rate').textContent = data.success_rate + '%';
+            });
+
+        function viewPost(filename) {
+            window.location.href = '/post/' + encodeURIComponent(filename);
+        }
+    </script>
+</body>
+</html>

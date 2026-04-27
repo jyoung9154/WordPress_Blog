@@ -1,0 +1,264 @@
+# ==============================================================================
+# AI 자동화 영어 금융 블로그 시스템 - Docker Compose 설정
+# ==============================================================================
+# 이 파일의 역할: WordPress, MySQL, n8n, Redis, Nginx 서비스를 Docker 컨테이너로 구성
+# 사용법: docker-compose up -d
+# ==============================================================================
+
+version: '3.8'
+
+services:
+  # -----------------------------------------------------------------------------
+  # WordPress 서비스
+  # -----------------------------------------------------------------------------
+  wordpress:
+    image: wordpress:latest
+    container_name: blog_wordpress
+    restart: unless-stopped
+    environment:
+      WORDPRESS_DB_HOST: mysql:3306
+      WORDPRESS_DB_USER: ${MYSQL_USER}
+      WORDPRESS_DB_PASSWORD: ${MYSQL_PASSWORD}
+      WORDPRESS_DB_NAME: ${MYSQL_DATABASE}
+      TZ: Asia/Seoul
+    volumes:
+      - wordpress_data:/var/www/html
+    ports:
+      - "8080:80"
+    depends_on:
+      - mysql
+      - redis
+    networks:
+      - blog_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health.php"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # -----------------------------------------------------------------------------
+  # MySQL 데이터베이스 서비스
+  # -----------------------------------------------------------------------------
+  mysql:
+    image: mysql:8.0
+    container_name: blog_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      TZ: Asia/Seoul
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./backup/mysql:/backup
+    networks:
+      - blog_network
+    command: --default-authentication-plugin=mysql_native_password
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # -----------------------------------------------------------------------------
+  # n8n 오토메이션 서비스 (선택사항)
+  # -----------------------------------------------------------------------------
+  # 참고: n8n은 자체 호스팅 시 Apache 2.0 라이선스로 무료 사용 가능하지만,
+  # 이 프로젝트에서는 LangGraph 기반 자체 파이프라인을 사용합니다.
+  # n8n이 필요하면 주석을 해제하세요.
+  #
+  # n8n:
+  #     image: n8nio/n8n:latest
+  #     container_name: blog_n8n
+  #     restart: unless-stopped
+  #     environment:
+  #     - N8N_BASIC_AUTH_ACTIVE=true
+  #     - N8N_BASIC_AUTH_USER=${N8N_USER}
+  #     - N8N_BASIC_AUTH_PASSWORD=${N8N_PASSWORD}
+  #     - N8N_HOST=${N8N_HOST}
+  #     - N8N_PORT=5678
+  #     - N8N_PROTOCOL=https
+  #     - WEBHOOK_URL=${N8N_WEBHOOK_URL}
+  #     - EXECUTIONS_DATA_SAVE_ON_ERROR=all
+  #     - EXECUTIONS_DATA_SAVE_ON_SUCCESS=all
+  #     - EXECUTIONS_DATA_SAVE_ON_TIMEOUT=all
+  #     - GENERIC_TIMEZONE=Asia/Seoul
+  #     volumes:
+  #     - n8n_data:/home/node/.n8n
+  #     ports:
+  #     - "5678:5678"
+  #     networks:
+  #     - blog_network
+  #     depends_on:
+  #     - redis
+
+  # -----------------------------------------------------------------------------
+  # Redis 캐시 서비스
+  # -----------------------------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: blog_redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    networks:
+      - blog_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # -----------------------------------------------------------------------------
+  # Flask 웹 앱 - 파이프라인 에디터 (n8n 스타일)
+  # -----------------------------------------------------------------------------
+  pipeline-editor:
+  build:
+  context: .
+  dockerfile: Dockerfile.webapp
+  container_name: blog_pipeline_editor
+  restart: unless-stopped
+  environment:
+  - FLASK_APP=web_review/pipeline_editor.py
+  - FLASK_ENV=production
+  - AI_PROVIDER=${AI_PROVIDER:-claude}
+  - CLAUDE_API_KEY=${CLAUDE_API_KEY}
+  - OPENAI_API_KEY=${OPENAI_API_KEY}
+  - GEMINI_API_KEY=${GEMINI_API_KEY}
+  - GROQ_API_KEY=${GROQ_API_KEY}
+  - WP_SITE_URL=${WP_SITE_URL}
+  - WP_API_USERNAME=${WP_API_USERNAME}
+  - WP_API_PASSWORD=${WP_API_PASSWORD}
+  - SECRET_KEY=${SECRET_KEY:-pipeline-editor-secret-key}
+  - TZ=Asia/Seoul
+  volumes:
+  - ./config:/app/config
+  - ./logs:/app/logs
+  - ./output:/app/output
+  ports:
+  - "5002:5002"
+  networks:
+  - blog_network
+  depends_on:
+  - wordpress
+  healthcheck:
+  test: ["CMD", "curl", "-f", "http://localhost:5002/"]
+  interval: 30s
+  timeout: 10s
+  retries: 3
+  
+  # -----------------------------------------------------------------------------
+  # Flask 웹 앱 - 관리자 대시보드
+  # -----------------------------------------------------------------------------
+  admin-dashboard:
+  build:
+  context: .
+  dockerfile: Dockerfile.webapp
+  container_name: blog_admin_dashboard
+  restart: unless-stopped
+  environment:
+  - FLASK_APP=web_review/admin.py
+  - FLASK_ENV=production
+  - AI_PROVIDER=${AI_PROVIDER:-claude}
+  - CLAUDE_API_KEY=${CLAUDE_API_KEY}
+  - OPENAI_API_KEY=${OPENAI_API_KEY}
+  - WP_SITE_URL=${WP_SITE_URL}
+  - WP_API_USERNAME=${WP_API_USERNAME}
+  - WP_API_PASSWORD=${WP_API_PASSWORD}
+  - SECRET_KEY=${SECRET_KEY:-admin-secret-key}
+  - TZ=Asia/Seoul
+  volumes:
+  - ./config:/app/config
+  - ./logs:/app/logs
+  - ./output:/app/output
+  ports:
+  - "5000:5000"
+  networks:
+  - blog_network
+  depends_on:
+  - wordpress
+  healthcheck:
+  test: ["CMD", "curl", "-f", "http://localhost:5000/admin"]
+  interval: 30s
+  timeout: 10s
+  retries: 3
+  
+  # -----------------------------------------------------------------------------
+  # Flask 웹 앱 - 검토 대시보드
+  # -----------------------------------------------------------------------------
+  review-dashboard:
+  build:
+  context: .
+  dockerfile: Dockerfile.webapp
+  container_name: blog_review_dashboard
+  restart: unless-stopped
+  environment:
+  - FLASK_APP=web_review/app.py
+  - FLASK_ENV=production
+  - WP_SITE_URL=${WP_SITE_URL}
+  - WP_API_USERNAME=${WP_API_USERNAME}
+  - WP_API_PASSWORD=${WP_API_PASSWORD}
+  - SECRET_KEY=${SECRET_KEY:-review-secret-key}
+  - TZ=Asia/Seoul
+  volumes:
+  - ./config:/app/config
+  - ./logs:/app/logs
+  - ./output:/app/output
+  ports:
+  - "5001:5000"
+  networks:
+  - blog_network
+  depends_on:
+  - wordpress
+  healthcheck:
+  test: ["CMD", "curl", "-f", "http://localhost:5000/"]
+  interval: 30s
+  timeout: 10s
+  retries: 3
+  
+  # -----------------------------------------------------------------------------
+  # Nginx 리버스 프록시 + SSL 서비스
+  # -----------------------------------------------------------------------------
+  nginx:
+  image: nginx:alpine
+  container_name: blog_nginx
+  restart: unless-stopped
+  volumes:
+  - ./nginx/conf.d:/etc/nginx/conf.d
+  - ./nginx/ssl:/etc/nginx/ssl
+  - wordpress_data:/var/www/html:ro
+  ports:
+  - "80:80"
+  - "443:443"
+  depends_on:
+  - wordpress
+  - pipeline-editor
+  - admin-dashboard
+  - review-dashboard
+  networks:
+  - blog_network
+  healthcheck:
+  test: ["CMD", "wget", "-q", "--spider", "http://localhost/health"]
+  interval: 30s
+  timeout: 10s
+  retries: 3
+
+# ==============================================================================
+# 볼륨 정의 (데이터 영속성)
+# ==============================================================================
+volumes:
+wordpress_data:
+driver: local
+mysql_data:
+driver: local
+redis_data:
+driver: local
+
+# ==============================================================================
+# 네트워크 정의
+# ==============================================================================
+networks:
+  blog_network:
+    driver: bridge

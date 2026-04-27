@@ -1,0 +1,205 @@
+{
+  "_comment": "이 파일을 직접 편집하여 블로그 주제와 키워드를 관리하세요",
+  "_instructions": {
+    "priority": "1=최고, 5=최저. 낮은 숫자가 먼저 작성됩니다",
+    "competition": "low/medium/high — 낮을수록 초반에 노출 유리",
+    "cpc_range": "예상 클릭당 광고 단가 (USD)",
+    "target_audience": "global = 전세계 사용자, en = 영어권 사용자"
+  },
+
+  "main_categories": [
+    {
+      "name": "AI & Technology",
+      "slug": "ai-technology",
+      "icon": "🤖",
+      "description": "AI, 머신러닝, 개발 관련 콘텐츠",
+      "color": "#667eea"
+    },
+    {
+      "name": "Finance & Investing",
+      "slug": "finance-investing",
+      "icon": "💰",
+      "description": "금융, 투자, 은퇴 계획",
+      "color": "#4caf50"
+    },
+    {
+      "name": "Economy & Markets",
+      "slug": "economy-markets",
+      "icon": "📊",
+      "description": "거시경제, 시장 분석",
+      "color": "#ff9800"
+    },
+    {
+      "name": "AI Skills & Prompts",
+      "slug": "ai-skills-prompts",
+      "icon": "🧠",
+      "description": "AI 활용법, 프롬프트 엔지니어링",
+      "color": "#9c27b0"
+    }
+  ],
+
+  "categories": [
+    {
+      "name": "AI & Machine Learning",
+      "slug": "ai-ml",
+      "main_category": "ai-technology",
+      "priority": 1,
+      "target_audience": "global",
+      "custom_prompt": "Write for a global audience. Cover the latest AI trends, machine learning breakthroughs, and practical AI applications. Make technical concepts accessible to beginners while providing value to experts.",
+      "keywords": [
+        {"keyword": "best AI tools for productivity 2026", "competition": "medium", "cpc_range": "$3-6", "target_audience": "global"},
+        {"keyword": "how to use ChatGPT for business", "competition": "medium", "cpc_range": "$4-8", "target_audience": "global"},
+        {"keyword": "Claude AI vs GPT-4 comparison", "competition": "low", "cpc_range": "$3-5", "target_audience": "global"},
+        {"keyword": "machine learning for beginners guide", "competition": "medium", "cpc_range": "$3-7", "target_audience": "global"},
+        {"keyword": "future of artificial intelligence 2026", "competition": "low", "cpc_range": "$2-5", "target_audience": "global"}
+      ],
+      "affiliate_products": ["ChatGPT Plus", "Claude Pro", "GitHub Copilot"]
+    },
+    {
+      "name": "AI Prompt Engineering",
+      "slug": "ai-prompt-engineering",
+      "main_category": "ai-skills-prompts",
+      "priority": 1,
+      "target_audience": "global",
+      "custom_prompt": "Write practical, actionable guides on AI prompting. Include real examples, templates, and techniques that readers can immediately apply. Target both beginners and advanced users.",
+      "keywords": [
+        {"keyword": "AI prompt skills generation guide", "competition": "low", "cpc_range": "$2-4", "target_audience": "global"},
+        {"keyword": "how to write effective AI prompts", "competition": "medium", "cpc_range": "$3-6", "target_audience": "global"},
+        {"keyword": "best ChatGPT prompts for work", "competition": "medium", "cpc_range": "$3-5", "target_audience": "global"},
+        {"keyword": "Claude AI prompt templates", "competition": "low", "cpc_range": "$2-4", "target_audience": "global"},
+        {"keyword": "advanced prompting techniques 2026", "competition": "low", "cpc_range": "$2-5", "target_audience": "global"}
+      ],
+      "affiliate_products": ["AI courses", "Prompt engineering books"]
+    },
+    {
+      "name": "Harness Engineering",
+      "slug": "harness-engineering",
+      "main_category": "ai-skills-prompts",
+      "priority": 2,
+      "target_audience": "global",
+      "custom_prompt": "Explain harness engineering concepts for AI optimization. Cover quality signals, content optimization, and techniques to maximize AI effectiveness. Make complex concepts simple with practical examples.",
+      "keywords": [
+        {"keyword": "what is harness engineering in AI", "competition": "low", "cpc_range": "$2-4", "target_audience": "global"},
+        {"keyword": "AI harness engineering best practices 2026", "competition": "low", "cpc_range": "$2-5", "target_audience": "global"},
+        {"keyword": "harness engineering for content creators", "competition": "low", "cpc_range": "$2-4", "target_audience": "global"},
+        {"keyword": "quality signal optimization for AI", "competition": "low", "cpc_range": "$2-5", "target_audience": "global"},
+        {"keyword": "AI output optimization techniques", "competition": "low", "cpc_range": "$2-4", "target_audience": "global"}
+      ],
+      "affiliate_products": ["AI tools subscriptions"]
+    },
+    {
+      "name": "Investing for Beginners",
+      "slug": "investing-beginners",
+      "main_category": "finance-investing",
+      "priority": 1,
+      "target_audience": "en",
+      "custom_prompt": "Write for someone who has never invested before. Assume zero financial knowledge. Use analogies. Keep the tone encouraging but honest about risks.",
+      "keywords": [
+        {"keyword": "how to start investing with $100", "competition": "low", "cpc_range": "$2-5", "target_audience": "en"},
+        {"keyword": "best index funds for beginners", "competition": "medium", "cpc_range": "$3-8", "target_audience": "en"},
+        {"keyword": "ETF vs mutual fund for beginners", "competition": "low", "cpc_range": "$3-6", "target_audience": "en"},
+        {"keyword": "what is dollar cost averaging", "competition": "low", "cpc_range": "$2-4", "target_audience": "en"},
+        {"keyword": "how to build a diversified portfolio", "competition": "medium", "cpc_range": "$3-6", "target_audience": "en"}
+      ],
+      "affiliate_products": ["M1 Finance", "Acorns", "Fidelity"]
+    },
+    {
+      "name": "ETF Investment Strategies",
+      "slug": "etf-investment",
+      "main_category": "finance-investing",
+      "priority": 2,
+      "target_audience": "en",
+      "custom_prompt": "Focus on practical ETF investment strategies. Include specific fund recommendations, comparison analysis, and portfolio construction tips. Data-driven with real examples.",
+      "keywords": [
+        {"keyword": "best ETFs to invest in 2026", "competition": "high", "cpc_range": "$4-10", "target_audience": "en"},
+        {"keyword": "top 100 ETFs for investment success", "competition": "medium", "cpc_range": "$3-7", "target_audience": "en"},
+        {"keyword": "ETF vs individual stocks comparison", "competition": "medium", "cpc_range": "$3-6", "target_audience": "en"},
+        {"keyword": "S&P 500 ETF guide for beginners", "competition": "low", "cpc_range": "$2-5", "target_audience": "en"},
+        {"keyword": "how to pick the right ETF", "competition": "medium", "cpc_range": "$3-6", "target_audience": "en"}
+      ],
+      "affiliate_products": ["Vanguard", "Schwab", "iShares"]
+    },
+    {
+      "name": "Retirement Planning",
+      "slug": "retirement-planning",
+      "main_category": "finance-investing",
+      "priority": 3,
+      "target_audience": "en",
+      "custom_prompt": "Focus on actionable retirement strategies. Include specific contribution limits and IRS rules. Target readers aged 25-45. Be specific about numbers and timelines.",
+      "keywords": [
+        {"keyword": "Roth IRA vs traditional IRA 2026", "competition": "medium", "cpc_range": "$4-10", "target_audience": "en"},
+        {"keyword": "how much to save for retirement by age", "competition": "low", "cpc_range": "$3-7", "target_audience": "en"},
+        {"keyword": "401k contribution limits 2026", "competition": "medium", "cpc_range": "$3-8", "target_audience": "en"},
+        {"keyword": "best retirement accounts for young adults", "competition": "low", "cpc_range": "$3-6", "target_audience": "en"},
+        {"keyword": "Roth IRA income limits 2026", "competition": "medium", "cpc_range": "$2-5", "target_audience": "en"}
+      ],
+      "affiliate_products": ["Betterment", "Vanguard", "Personal Capital"]
+    },
+    {
+      "name": "Global Economy",
+      "slug": "global-economy",
+      "main_category": "economy-markets",
+      "priority": 1,
+      "target_audience": "global",
+      "custom_prompt": "Analyze global economic trends in an accessible way. Cover macroeconomic indicators, central bank policies, and their impact on everyday finances. Balance depth with readability.",
+      "keywords": [
+        {"keyword": "global economy outlook 2026", "competition": "medium", "cpc_range": "$3-6", "target_audience": "global"},
+        {"keyword": "Federal Reserve interest rate impact", "competition": "medium", "cpc_range": "$3-7", "target_audience": "global"},
+        {"keyword": "inflation vs recession what to know", "competition": "low", "cpc_range": "$2-5", "target_audience": "global"},
+        {"keyword": "emerging markets investment opportunities", "competition": "medium", "cpc_range": "$4-8", "target_audience": "global"},
+        {"keyword": "how economy affects your daily life", "competition": "low", "cpc_range": "$2-4", "target_audience": "global"}
+      ],
+      "affiliate_products": ["Economist subscription", "Bloomberg"]
+    },
+    {
+      "name": "Stock Market Analysis",
+      "slug": "stock-market",
+      "main_category": "economy-markets",
+      "priority": 2,
+      "target_audience": "en",
+      "custom_prompt": "Provide clear, jargon-free stock market analysis. Help readers understand market movements, valuation concepts, and investment opportunities without making specific stock recommendations.",
+      "keywords": [
+        {"keyword": "stock market trends 2026 analysis", "competition": "medium", "cpc_range": "$3-6", "target_audience": "en"},
+        {"keyword": "how to read stock charts for beginners", "competition": "medium", "cpc_range": "$3-7", "target_audience": "en"},
+        {"keyword": "bull market vs bear market explained", "competition": "low", "cpc_range": "$2-4", "target_audience": "en"},
+        {"keyword": "market capitalization explained", "competition": "low", "cpc_range": "$2-4", "target_audience": "en"},
+        {"keyword": "how to diversify stock portfolio", "competition": "medium", "cpc_range": "$3-6", "target_audience": "en"}
+      ],
+      "affiliate_products": ["Trading platforms"]
+    },
+    {
+      "name": "AI Business Applications",
+      "slug": "ai-business",
+      "main_category": "ai-technology",
+      "priority": 2,
+      "target_audience": "global",
+      "custom_prompt": "Explore how businesses of all sizes can leverage AI. Include case studies, implementation guides, and ROI analysis. Practical advice for entrepreneurs and business leaders.",
+      "keywords": [
+        {"keyword": "how businesses use AI in 2026", "competition": "medium", "cpc_range": "$4-8", "target_audience": "global"},
+        {"keyword": "AI automation for small business", "competition": "medium", "cpc_range": "$4-8", "target_audience": "global"},
+        {"keyword": "ROI of AI implementation", "competition": "low", "cpc_range": "$3-6", "target_audience": "global"},
+        {"keyword": "AI tools for marketing automation", "competition": "medium", "cpc_range": "$4-7", "target_audience": "global"},
+        {"keyword": "ChatGPT for business use cases", "competition": "medium", "cpc_range": "$3-6", "target_audience": "global"}
+      ],
+      "affiliate_products": ["AI SaaS tools", "Business courses"]
+    },
+    {
+      "name": "Personal Finance",
+      "slug": "personal-finance",
+      "main_category": "finance-investing",
+      "priority": 4,
+      "target_audience": "en",
+      "custom_prompt": "Practical personal finance advice for everyday readers. Cover budgeting, saving, debt management, and financial goal setting. Empathetic, non-judgmental tone.",
+      "keywords": [
+        {"keyword": "50/30/20 budget rule explained", "competition": "low", "cpc_range": "$2-5", "target_audience": "en"},
+        {"keyword": "how to build an emergency fund", "competition": "medium", "cpc_range": "$3-6", "target_audience": "en"},
+        {"keyword": "best budgeting apps 2026", "competition": "high", "cpc_range": "$4-8", "target_audience": "en"},
+        {"keyword": "debt payoff strategies that work", "competition": "medium", "cpc_range": "$3-6", "target_audience": "en"},
+        {"keyword": "how to improve your credit score", "competition": "high", "cpc_range": "$4-8", "target_audience": "en"}
+      ],
+      "affiliate_products": ["YNAB", "Personal Capital", "Credit Karma"]
+    }
+  ],
+
+  "_add_your_categories_below": "위 형식을 복사해서 카테고리를 추가하세요. 각 카테고리는 고유한 slug를 가져야 합니다."
+}

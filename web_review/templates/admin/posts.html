@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>포스트 목록 - 관리 대시보드</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, sans-serif; background: #f5f5f5; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 25px 0; }
+        .header h1 { font-size: 1.5rem; }
+        .nav { background: white; padding: 15px 0; border-bottom: 1px solid #eee; }
+        .nav-list { max-width: 1200px; margin: 0 auto; padding: 0 20px; display: flex; gap: 20px; list-style: none; }
+        .nav-list a { color: #667eea; text-decoration: none; }
+        .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
+        .section { background: white; padding: 25px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .section h2 { margin-bottom: 20px; font-size: 1.2rem; }
+        .posts-table { width: 100%; border-collapse: collapse; }
+        .posts-table th, .posts-table td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; }
+        .posts-table th { background: #f9f9f9; font-weight: 600; color: #555; }
+        .posts-table tr:hover td { background: #f9f9f9; }
+        .status-badge { padding: 5px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; }
+        .status-badge.published { background: #e8f5e9; color: #2e7d32; }
+        .status-badge.draft { background: #fff3e0; color: #e65100; }
+        .status-badge.error { background: #ffebee; color: #c62828; }
+        .empty-state { text-align: center; padding: 60px; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <h1>📝 포스트 목록</h1>
+        </div>
+    </div>
+    
+    <div class="nav">
+        <ul class="nav-list">
+            <li><a href="/">📊 대시보드</a></li>
+            <li><a href="/posts">📝 포스트</a></li>
+        </ul>
+    </div>
+
+    <div class="container">
+        <div class="section">
+            <h2>모든 포스트 ({{ posts|length }}개)</h2>
+            
+            {% if posts %}
+            <table class="posts-table">
+                <thead>
+                    <tr>
+                        <th>상태</th>
+                        <th>제목</th>
+                        <th>키워드</th>
+                        <th>카테고리</th>
+                        <th>SEO 점수</th>
+                        <th>파일명</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for post in posts %}
+                    <tr>
+                        <td>
+                            <span class="status-badge {{ post.status }}">
+                                {% if post.status == 'published' %}✅ 발행됨
+                                {% elif post.status == 'draft' %}📝 대기
+                                {% else %}❌ 오류
+                                {% endif %}
+                            </span>
+                        </td>
+                        <td>{{ post.title }}</td>
+                        <td>{{ post.keyword }}</td>
+                        <td>{{ post.category }}</td>
+                        <td>{{ post.seo_score }}</td>
+                        <td><code>{{ post.filename }}</code></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-state">
+                <h2>📭 포스트가 없습니다</h2>
+                <p>먼저 'python scripts/generate_post.py --random'으로 포스트를 생성해주세요.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>설정 - 관리 대시보드</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, sans-serif; background: #f5f5f5; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 25px 0; }
+        .header h1 { font-size: 1.5rem; }
+        .nav { background: white; padding: 15px 0; border-bottom: 1px solid #eee; }
+        .nav-list { max-width: 1000px; margin: 0 auto; padding: 0 20px; display: flex; gap: 20px; list-style: none; }
+        .nav-list a { color: #667eea; text-decoration: none; }
+        .container { max-width: 800px; margin: 30px auto; padding: 0 20px; }
+        .card { background: white; padding: 25px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .card h2 { margin-bottom: 15px; font-size: 1.2rem; }
+        .settings-list { list-style: none; }
+        .settings-list li { padding: 15px 0; border-bottom: 1px solid #eee; }
+        .settings-list li:last-child { border-bottom: none; }
+        .settings-list a { color: #333; text-decoration: none; display: flex; align-items: center; gap: 10px; }
+        .settings-list a:hover { color: #667eea; }
+        .settings-list .icon { font-size: 1.5rem; }
+        .settings-list .desc { color: #666; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <h1>⚙️ 설정</h1>
+        </div>
+    </div>
+    
+    <div class="nav">
+        <ul class="nav-list">
+            <li><a href="/">📊 대시보드</a></li>
+            <li><a href="/settings">⚙️ 설정</a></li>
+        </ul>
+    </div>
+
+    <div class="container">
+        <div class="card">
+            <h2>설정 메뉴</h2>
+            <ul class="settings-list">
+                <li>
+                    <a href="/settings/ai">
+                        <span class="icon">🤖</span>
+                        <div>
+                            <strong>AI 프로바이더 설정</strong>
+                            <div class="desc">Claude, OpenAI, Gemini 등 AI 연결 설정</div>
+                        </div>
+                    </a>
+                </li>
+                <li>
+                    <a href="/settings/wordpress">
+                        <span class="icon">🌐</span>
+                        <div>
+                            <strong>WordPress 설정</strong>
+                            <div class="desc">REST API 연결, 사이트 URL 설정</div>
+                        </div>
+                    </a>
+                </li>
+                <li>
+                    <a href="/settings/categories">
+                        <span class="icon">📁</span>
+                        <div>
+                            <strong>카테고리/키워드 관리</strong>
+                            <div class="desc">블로그 카테고리 및 키워드 설정</div>
+                        </div>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h2>📋 현재 설정값</h2>
+            <p style="color: #666; margin-bottom: 15px;">.env 파일의 현재 설정값 (민감 정보 마스킹됨)</p>
+            <div style="background: #f9f9f9; padding: 15px; border-radius: 5px; font-family: monospace; font-size: 0.9rem;">
+                {% for key, value in config.items() %}
+                <div><strong>{{ key }}:</strong> {{ value }}</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>

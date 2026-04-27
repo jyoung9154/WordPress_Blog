@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>검토 로그</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            background: white;
+            padding: 20px 0;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .back-link {
+            color: #667eea;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        h1 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+        }
+        .logs-table {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        th {
+            background: #f9f9f9;
+            font-weight: 600;
+            color: #555;
+        }
+        tr:last-child td {
+            border-bottom: none;
+        }
+        tr:hover td {
+            background: #f9f9f9;
+        }
+        .action-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+        .action-approved {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        .action-rejected {
+            background: #ffebee;
+            color: #c62828;
+        }
+        .action-regenerated {
+            background: #fff3e0;
+            color: #e65100;
+        }
+        .action-skipped {
+            background: #eceff1;
+            color: #546e7a;
+        }
+        .action-deleted {
+            background: #fce4ec;
+            color: #ad1457;
+        }
+        .timestamp {
+            color: #666;
+            font-size: 0.85rem;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <a href="/" class="back-link">← 검토 대기열로 돌아가기</a>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <h1>📋 검토 로그</h1>
+        
+        <div class="logs-table">
+            {% if logs %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>시간</th>
+                        <th>작업</th>
+                        <th>포스트 제목</th>
+                        <th>피드백</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in logs|reverse %}
+                    <tr>
+                        <td class="timestamp">{{ log.timestamp }}</td>
+                        <td>
+                            <span class="action-badge action-{{ log.action }}">
+                                {% if log.action == 'approved' %}✅ 승인
+                                {% elif log.action == 'rejected' %}❌ 거부
+                                {% elif log.action == 'regenerated' %}🔄 재생성
+                                {% elif log.action == 'skipped' %}⏭️ 건너뜀
+                                {% elif log.action == 'deleted' %}🗑️ 삭제
+                                {% else %}{{ log.action }}
+                                {% endif %}
+                            </span>
+                        </td>
+                        <td>{{ log.post_title }}</td>
+                        <td>{{ log.feedback or '-' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-state">
+                <h2>📭 검토 로그가 없습니다</h2>
+                <p>아직 검토한 포스트가 없습니다.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

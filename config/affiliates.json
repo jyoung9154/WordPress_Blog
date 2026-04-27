@@ -1,0 +1,237 @@
+{
+  "_comment": "제휴 마케팅 설정 파일 - 카테고리별 제휴 링크 매핑",
+  "_version": "1.0",
+
+  "insertion_rules": {
+    "max_per_post": 3,
+    "placement": [
+      "first mention of product",
+      "comparison table",
+      "conclusion CTA"
+    ],
+    "html_template": "<a href='{affiliate_url}' rel='nofollow sponsored' target='_blank' class='affiliate-link'>{anchor_text}</a>",
+    "disclosure_required": true,
+    "disclosure_text": "This post contains affiliate links. I may earn a commission at no extra cost to you. Please read my <a href='/affiliate-disclosure/'>affiliate disclosure</a> for more information.",
+    "disclosure_position": "bottom"
+  },
+
+  "products": {
+    "M1 Finance": {
+      "affiliate_url": "https://m1.com/r/your-affiliate-id",
+      "network": "직접 제휴",
+      "commission": "$100 per signup",
+      "cookie_days": 30,
+      "best_for": ["investing-beginners", "retirement-planning"],
+      "anchor_text_options": [
+        "open a free M1 Finance account",
+        "start investing with M1 Finance",
+        "try M1 Finance for automated investing"
+      ]
+    },
+    "Acorns": {
+      "affiliate_url": "https://acorns.com/r/your-affiliate-id",
+      "network": "직접 제휴",
+      "commission": "$10-20 per install",
+      "cookie_days": 30,
+      "best_for": ["investing-beginners", "banking-savings"],
+      "anchor_text_options": [
+        "download Acorns and start investing spare change",
+        "try Acorns for micro-investing",
+        "open an Acorns account"
+      ]
+    },
+    "Fidelity": {
+      "affiliate_url": "https://www.fidelity.com/referral/your-id",
+      "network": "직접 제휴",
+      "commission": "varies by product",
+      "cookie_days": 30,
+      "best_for": ["investing-beginners", "retirement-planning"],
+      "anchor_text_options": [
+        "open a Fidelity account",
+        "start investing in index funds at Fidelity",
+        "try Fidelity for commission-free trading"
+      ]
+    },
+    "Betterment": {
+      "affiliate_url": "https://betterment.com/r/your-affiliate-id",
+      "network": "Impact Radius",
+      "commission": "$50-100 per signup",
+      "cookie_days": 45,
+      "best_for": ["retirement-planning", "investing-beginners"],
+      "anchor_text_options": [
+        "open a Betterment account for automated investing",
+        "try Betterment's robo-advisor",
+        "start retirement investing with Betterment"
+      ]
+    },
+    "Vanguard": {
+      "affiliate_url": "",
+      "network": "직접 제휴",
+      "commission": "varies",
+      "cookie_days": 30,
+      "best_for": ["retirement-planning", "investing-beginners"],
+      "anchor_text_options": [
+        "invest at Vanguard",
+        "open a Vanguard account for index funds",
+        "try Vanguard for low-cost investing"
+      ]
+    },
+    "Personal Capital (Empower)": {
+      "affiliate_url": "https://empower.com/invite/your-id",
+      "network": "Impact Radius",
+      "commission": "$50-100 per signup",
+      "cookie_days": 45,
+      "best_for": ["retirement-planning", "banking-savings"],
+      "anchor_text_options": [
+        "track your net worth with Empower",
+        "try Empower for free portfolio analysis",
+        "use Empower to manage your wealth"
+      ]
+    },
+    "SoFi": {
+      "affiliate_url": "https://sofi.com/invite/your-id",
+      "network": "직접 제휴",
+      "commission": "$50-100 per funded account",
+      "cookie_days": 30,
+      "best_for": ["debt-payoff", "investing-beginners"],
+      "anchor_text_options": [
+        "refinance your loans with SoFi",
+        "try SoFi for personal loans",
+        "open a SoFi investment account"
+      ]
+    },
+    "Earnest": {
+      "affiliate_url": "https://earnest.com/r/your-affiliate-id",
+      "network": "직접 제휴",
+      "commission": "$50-200 per funded loan",
+      "cookie_days": 30,
+      "best_for": ["debt-payoff"],
+      "anchor_text_options": [
+        "refinance student loans with Earnest",
+        "check your rate with Earnest",
+        "try Earnest for student loan refinancing"
+      ]
+    },
+    "NaviRefi": {
+      "affiliate_url": "https://navi.com/r/your-affiliate-id",
+      "network": "직접 제휴",
+      "commission": "varies",
+      "cookie_days": 30,
+      "best_for": ["debt-payoff"],
+      "anchor_text_options": [
+        "refinance with NaviRefi",
+        "lower your student loan rate with NaviRefi",
+        "check NaviRefi rates"
+      ]
+    },
+    "Marcus by Goldman Sachs": {
+      "affiliate_url": "https://marcus.com/r/your-affiliate-id",
+      "network": "직접 제휴",
+      "commission": "varies",
+      "cookie_days": 30,
+      "best_for": ["banking-savings"],
+      "anchor_text_options": [
+        "open a high-yield savings account with Marcus",
+        "try Marcus for better savings rates",
+        "start saving with Marcus by Goldman Sachs"
+      ]
+    },
+    "Ally Bank": {
+      "affiliate_url": "https://ally.com/r/your-affiliate-id",
+      "network": "직접 제휴",
+      "commission": "varies",
+      "cookie_days": 30,
+      "best_for": ["banking-savings"],
+      "anchor_text_options": [
+        "open an Ally Bank account",
+        "try Ally for high-yield savings",
+        "switch to Ally Bank"
+      ]
+    },
+    "Discover Bank": {
+      "affiliate_url": "https://discover.com/r/your-affiliate-id",
+      "network": "직접 제휴",
+      "commission": "varies",
+      "cookie_days": 30,
+      "best_for": ["banking-savings"],
+      "anchor_text_options": [
+        "open a Discover savings account",
+        "try Discover for competitive CD rates",
+        "start saving with Discover"
+      ]
+    },
+    "Credit Karma": {
+      "affiliate_url": "https://creditkarma.com/r/your-affiliate-id",
+      "network": "직접 제휴",
+      "commission": "$2-5 per lead",
+      "cookie_days": 30,
+      "best_for": ["credit-cards"],
+      "anchor_text_options": [
+        "check your credit score free with Credit Karma",
+        "get your free credit report from Credit Karma",
+        "try Credit Karma for credit monitoring"
+      ]
+    },
+    "TurboTax": {
+      "affiliate_url": "https://turbotax.com/r/your-affiliate-id",
+      "network": "CJ Affiliate",
+      "commission": "$20-50 per sale",
+      "cookie_days": 30,
+      "best_for": ["retirement-planning"],
+      "seasonal_boost": "January-April",
+      "anchor_text_options": [
+        "file your taxes with TurboTax",
+        "try TurboTax for easy tax filing",
+        "use TurboTax to maximize your refund"
+      ]
+    }
+  },
+
+  "keyword_mapping": {
+    "Roth IRA": {
+      "product": "M1 Finance",
+      "placement": "first_mention",
+      "anchor_text": "open a Roth IRA"
+    },
+    "index fund": {
+      "product": "Fidelity",
+      "placement": "comparison",
+      "anchor_text": "start investing in index funds"
+    },
+    "student loan": {
+      "product": "Earnest",
+      "placement": "conclusion",
+      "anchor_text": "refinance your student loans"
+    },
+    "high yield savings": {
+      "product": "Marcus by Goldman Sachs",
+      "placement": "first_mention",
+      "anchor_text": "open a high-yield savings account"
+    },
+    "credit score": {
+      "product": "Credit Karma",
+      "placement": "first_mention",
+      "anchor_text": "check your credit score free"
+    },
+    "automated investing": {
+      "product": "Betterment",
+      "placement": "first_mention",
+      "anchor_text": "try automated investing with Betterment"
+    },
+    "retirement account": {
+      "product": "Vanguard",
+      "placement": "conclusion",
+      "anchor_text": "open a retirement account at Vanguard"
+    }
+  },
+
+  "tracking_params": {
+    "utm_source": "blog",
+    "utm_medium": "affiliate",
+    "utm_campaign": "auto-generated",
+    "extra_params": {
+      "ref": "blog_content",
+      "content_type": "in_article"
+    }
+  }
+}

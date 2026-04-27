@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ post.title }} - 검토</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            background: white;
+            padding: 20px 0;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .back-link {
+            color: #667eea;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        .post-header {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .post-header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        .meta-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        .meta-info span {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .seo-badge {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+        .content-preview {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .content-preview h2 {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            color: #555;
+        }
+        .content-box {
+            max-height: 500px;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 5px;
+            border: 1px solid #eee;
+        }
+        .content-box h1, .content-box h2, .content-box h3 {
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        .content-box p {
+            margin-bottom: 15px;
+        }
+        .content-box ul, .content-box ol {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+        .content-box a {
+            color: #667eea;
+        }
+        .actions {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .actions h2 {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            color: #555;
+        }
+        .action-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-approve {
+            background: #4caf50;
+            color: white;
+        }
+        .btn-approve:hover {
+            background: #43a047;
+        }
+        .btn-reject {
+            background: #f44336;
+            color: white;
+        }
+        .btn-reject:hover {
+            background: #e53935;
+        }
+        .btn-regenerate {
+            background: #ff9800;
+            color: white;
+        }
+        .btn-regenerate:hover {
+            background: #fb8c00;
+        }
+        .btn-skip {
+            background: #9e9e9e;
+            color: white;
+        }
+        .btn-skip:hover {
+            background: #757575;
+        }
+        .btn-delete {
+            background: #b71c1c;
+            color: white;
+        }
+        .btn-delete:hover {
+            background: #c62828;
+        }
+        .feedback-section {
+            margin-top: 20px;
+            display: none;
+        }
+        .feedback-section.active {
+            display: block;
+        }
+        .feedback-section textarea {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            resize: vertical;
+            min-height: 100px;
+        }
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            background: #333;
+            color: white;
+            border-radius: 8px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .toast.show {
+            opacity: 1;
+        }
+        .toast.success {
+            background: #4caf50;
+        }
+        .toast.error {
+            background: #f44336;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <a href="/" class="back-link">← 검토 대기열로 돌아가기</a>
+                <span style="color: #666; font-size: 0.9rem;">파일: {{ filename }}</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="post-header">
+            <h1>{{ post.title }}</h1>
+            <div class="meta-info">
+                <span>🔑 {{ post.keyword }}</span>
+                <span>📁 {{ post.category }}</span>
+                <span>⏱️ {{ post.estimated_read_time }}분</span>
+                {% if post.seo_score != 'N/A' %}
+                <span class="seo-badge">📊 SEO {{ post.seo_score }}/100</span>
+                {% endif %}
+                <span>🏷️ {{ post.tags|join(', ') }}</span>
+            </div>
+        </div>
+
+        <div class="content-preview">
+            <h2>📝 본문 미리보기</h2>
+            <div class="content-box">
+                {{ post.content|safe }}
+            </div>
+        </div>
+
+        <div class="actions">
+            <h2>⚡ 작업 선택</h2>
+            <div class="action-buttons">
+                <button class="btn btn-approve" onclick="approvePost()">
+                    ✅ 승인 후 발행
+                </button>
+                <button class="btn btn-reject" onclick="showFeedback('reject')">
+                    ❌ 거부
+                </button>
+                <button class="btn btn-regenerate" onclick="showFeedback('regenerate')">
+                    🔄 재생성 요청
+                </button>
+                <button class="btn btn-skip" onclick="skipPost()">
+                    ⏭️ 건너뛰기
+                </button>
+                <button class="btn btn-delete" onclick="deletePost()">
+                    🗑️ 삭제
+                </button>
+            </div>
+
+            <div id="feedback-section" class="feedback-section">
+                <h3 id="feedback-title" style="margin-bottom: 10px;"></h3>
+                <textarea id="feedback-input" placeholder="피드백을 입력하세요..."></textarea>
+                <div style="margin-top: 10px;">
+                    <button class="btn btn-approve" onclick="submitFeedback()">제출</button>
+                    <button class="btn btn-skip" onclick="hideFeedback()">취소</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script>
+        let currentAction = '';
+        const filename = '{{ filename }}';
+        const postTitle = '{{ post.title }}';
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast show ' + type;
+            setTimeout(() => {
+                toast.className = 'toast';
+            }, 3000);
+        }
+
+        function showFeedback(action) {
+            currentAction = action;
+            const section = document.getElementById('feedback-section');
+            const title = document.getElementById('feedback-title');
+            
+            if (action === 'reject') {
+                title.textContent = '거부 사유 (선택사항)';
+            } else if (action === 'regenerate') {
+                title.textContent = '재생성 피드백 (필수)';
+            }
+            
+            section.classList.add('active');
+        }
+
+        function hideFeedback() {
+            document.getElementById('feedback-section').classList.remove('active');
+            currentAction = '';
+        }
+
+        function approvePost() {
+            fetch('/approve', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ filename, title: postTitle })
+            })
+            .then(res => res.json())
+            .then(data => {
+                showToast(data.message, 'success');
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 2000);
+            })
+            .catch(err => {
+                showToast('오류가 발생했습니다: ' + err, 'error');
+            });
+        }
+
+        function skipPost() {
+            fetch('/skip', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ filename, title: postTitle })
+            })
+            .then(res => res.json())
+            .then(data => {
+                showToast(data.message, 'success');
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 1500);
+            });
+        }
+
+        function deletePost() {
+            if (!confirm('정말 이 포스트를 삭제하시겠습니까?')) return;
+            
+            fetch('/delete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ filename, title: postTitle })
+            })
+            .then(res => res.json())
+            .then(data => {
+                showToast(data.message, 'success');
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 1500);
+            });
+        }
+
+        function submitFeedback() {
+            const feedback = document.getElementById('feedback-input').value;
+            
+            if (currentAction === 'regenerate' && !feedback.trim()) {
+                showToast('재생성 피드백을 입력해주세요.', 'error');
+                return;
+            }
+
+            const endpoint = currentAction === 'reject' ? '/reject' : '/regenerate';
+            
+            fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ filename, title: postTitle, feedback })
+            })
+            .then(res => res.json())
+            .then(data => {
+                showToast(data.message, 'success');
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 1500);
+            });
+        }
+    </script>
+</body>
+</html>

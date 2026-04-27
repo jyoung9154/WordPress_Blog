@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WordPress 설정 - 관리 대시보드</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, sans-serif; background: #f5f5f5; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 25px 0; }
+        .header h1 { font-size: 1.5rem; }
+        .nav { background: white; padding: 15px 0; border-bottom: 1px solid #eee; }
+        .nav-list { max-width: 800px; margin: 0 auto; padding: 0 20px; display: flex; gap: 20px; list-style: none; }
+        .nav-list a { color: #667eea; text-decoration: none; }
+        .container { max-width: 600px; margin: 30px auto; padding: 0 20px; }
+        .card { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .card h2 { margin-bottom: 20px; font-size: 1.2rem; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: bold; color: #555; }
+        .form-group input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 5px; font-size: 1rem; }
+        .form-group small { color: #666; margin-top: 5px; display: block; }
+        .btn { padding: 12px 25px; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem; }
+        .btn-primary { background: #667eea; color: white; }
+        .btn-success { background: #4caf50; color: white; }
+        .info-box { background: #e3f2fd; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+        .info-box h3 { font-size: 1rem; margin-bottom: 10px; }
+        .info-box ol { margin-left: 20px; }
+        .info-box li { margin-bottom: 5px; }
+        .toast { position: fixed; bottom: 20px; right: 20px; padding: 15px 25px; background: #333; color: white; border-radius: 8px; opacity: 0; transition: opacity 0.3s; }
+        .toast.show { opacity: 1; }
+        .toast.success { background: #4caf50; }
+        .toast.error { background: #f44336; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <h1>🌐 WordPress 설정</h1>
+        </div>
+    </div>
+    
+    <div class="nav">
+        <ul class="nav-list">
+            <li><a href="/">📊 대시보드</a></li>
+            <li><a href="/settings">⚙️ 설정</a></li>
+            <li><a href="/settings/ai">🤖 AI 설정</a></li>
+            <li><a href="/settings/wordpress">🌐 WordPress</a></li>
+        </ul>
+    </div>
+
+    <div class="container">
+        <div class="card">
+            <h2>WordPress REST API 연결 설정</h2>
+            
+            <div class="info-box">
+                <h3>📋 애플리케이션 비밀번호 생성 방법</h3>
+                <ol>
+                    <li>WordPress 관리자 페이지에 로그인</li>
+                    <li>사용자 > 프로필 이동</li>
+                    <li>"애플리케이션 비밀번호" 섹션에서 새 비밀번호 생성</li>
+                    <li>생성된 비밀번호를 복사하여 아래에 붙여넣기</li>
+                </ol>
+            </div>
+            
+            <form id="wp-form">
+                <div class="form-group">
+                    <label>WordPress 사이트 URL</label>
+                    <input type="url" id="site_url" name="site_url" placeholder="https://your-domain.com" value="{{ config.get('WP_SITE_URL', '') }}">
+                    <small>WordPress가 설치된 URL ( trailing slash 없이)</small>
+                </div>
+                
+                <div class="form-group">
+                    <label>사용자명 (Username)</label>
+                    <input type="text" id="username" name="username" placeholder="admin" value="{{ config.get('WP_API_USERNAME', '') }}">
+                    <small>WordPress 로그인 사용자명</small>
+                </div>
+                
+                <div class="form-group">
+                    <label>애플리케이션 비밀번호</label>
+                    <input type="password" id="password" name="password" placeholder="xxxx xxxx xxxx xxxx xxxx xxxx">
+                    <small>프로필 > 애플리케이션 비밀번호에서 생성</small>
+                </div>
+                
+                <div style="display: flex; gap: 10px;">
+                    <button type="submit" class="btn btn-primary">💾 저장</button>
+                    <button type="button" class="btn btn-success" onclick="testConnection()">🧪 연결 테스트</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script>
+        document.getElementById('wp-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = {
+                site_url: document.getElementById('site_url').value,
+                username: document.getElementById('username').value,
+                password: document.getElementById('password').value
+            };
+            
+            try {
+                const response = await fetch('/settings/wordpress', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+                
+                const result = await response.json();
+                showToast(result.message, result.success ? 'success' : 'error');
+            } catch (err) {
+                showToast('오류가 발생했습니다', 'error');
+            }
+        });
+
+        async function testConnection() {
+            try {
+                const response = await fetch('/api/test-wordpress', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({})
+                });
+                
+                const result = await response.json();
+                showToast(result.message || result.error, result.success ? 'success' : 'error');
+            } catch (err) {
+                showToast('연결 테스트 실패', 'error');
+            }
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast show ' + type;
+            setTimeout(() => toast.className = 'toast', 3000);
+        }
+    </script>
+</body>
+</html>

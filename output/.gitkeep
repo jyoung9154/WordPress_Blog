@@ -1,0 +1,5 @@
+# 이 폴더에는 생성된 포스트 JSON 파일이 저장됩니다.
+# - post_YYYYMMDD_HHMMSS_keyword.json: 원본 생성 포스트
+# - post_YYYYMMDD_HHMMSS_keyword_optimized.json: SEO 최적화 후
+# - post_YYYYMMDD_HHMMSS_keyword_affiliate.json: 제휴링크 삽입 후
+# - post_YYYYMMDD_HHMMSS_keyword_published.json: WordPress 발행 완료

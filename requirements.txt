@@ -1,0 +1,44 @@
+# ==============================================================================
+# AI 자동화 영어 금융 블로그 시스템 - Python 의존성
+# ==============================================================================
+# 이 파일의 역할: 프로젝트에 필요한 Python 패키지 목록 정의
+# 설치 방법: pip install -r requirements.txt
+# ==============================================================================
+
+# AI API 클라이언트
+anthropic>=0.18.0
+openai>=1.12.0
+google-generativeai>=0.3.0  # Google Gemini 지원
+groq>=0.4.0  # Groq API 지원
+
+# LangGraph (파이프라인 오케스트레이션)
+langgraph>=0.0.20
+langchain>=0.1.0
+langchain-core>=0.1.0
+langchain-anthropic>=0.1.0
+langchain-openai>=0.0.5
+
+# HTTP 요청
+requests>=2.31.0
+httpx>=0.26.0
+
+# 웹 프레임워크
+flask>=3.0.0
+werkzeug>=3.0.0
+
+# 데이터 처리
+python-dotenv>=1.0.0
+python-dateutil>=2.8.0
+
+# 로깅
+colorlog>=6.8.0
+
+# 스케줄링
+schedule>=1.2.0
+
+# HTML/XML 처리
+beautifulsoup4>=4.12.0
+lxml>=4.9.0
+
+# JSON 스키마 검증
+jsonschema>=4.20.0

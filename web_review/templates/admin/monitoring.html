@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>모니터링 - 관리 대시보드</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, sans-serif; background: #f5f5f5; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 25px 0; }
+        .header h1 { font-size: 1.5rem; }
+        .nav { background: white; padding: 15px 0; border-bottom: 1px solid #eee; }
+        .nav-list { max-width: 1200px; margin: 0 auto; padding: 0 20px; display: flex; gap: 20px; list-style: none; }
+        .nav-list a { color: #667eea; text-decoration: none; }
+        .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .stat-card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center; }
+        .stat-card .value { font-size: 2rem; font-weight: bold; color: #667eea; }
+        .stat-card .label { color: #666; font-size: 0.9rem; }
+        .section { background: white; padding: 25px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .section h2 { margin-bottom: 15px; font-size: 1.2rem; }
+        .log-list { max-height: 400px; overflow-y: auto; }
+        .log-item { padding: 10px; border-bottom: 1px solid #eee; font-family: monospace; font-size: 0.85rem; }
+        .log-item:last-child { border-bottom: none; }
+        .log-item .time { color: #999; margin-right: 10px; }
+        .log-item.error { background: #ffebee; }
+        .log-item.success { background: #e8f5e9; }
+        .refresh-btn { padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <h1>📈 모니터링 대시보드</h1>
+        </div>
+    </div>
+    
+    <div class="nav">
+        <ul class="nav-list">
+            <li><a href="/">📊 대시보드</a></li>
+            <li><a href="/monitoring">📈 모니터링</a></li>
+            <li><a href="/posts">📝 포스트</a></li>
+        </ul>
+    </div>
+
+    <div class="container">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="value">{{ stats.posts.total }}</div>
+                <div class="label">총 포스트</div>
+            </div>
+            <div class="stat-card">
+                <div class="value">{{ stats.posts.pending }}</div>
+                <div class="label">대기 중</div>
+            </div>
+            <div class="stat-card">
+                <div class="value">{{ stats.posts.published }}</div>
+                <div class="label">발행됨</div>
+            </div>
+            <div class="stat-card">
+                <div class="value">{{ stats.scheduler.total_runs|default(0) }}</div>
+                <div class="label">파이프라인 실행</div>
+            </div>
+            <div class="stat-card">
+                <div class="value">{{ stats.scheduler.successful_runs|default(0) }}</div>
+                <div class="label">성공</div>
+            </div>
+            <div class="stat-card">
+                <div class="value">{{ stats.scheduler.failed_runs|default(0) }}</div>
+                <div class="label">실패</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h2>📋 최근 로그</h2>
+                <button class="refresh-btn" onclick="location.reload()">🔄 새로고침</button>
+            </div>
+            <div class="log-list">
+                {% if logs %}
+                    {% for log_file, line in logs %}
+                    <div class="log-item {% if 'ERROR' in line %}error{% elif 'SUCCESS' in line or 'complete' in line %}success{% endif %}">
+                        <span class="time">{{ log_file }}</span>
+                        {{ line }}
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p style="color: #666; text-align: center; padding: 40px;">로그 파일이 없습니다.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>⏰ 스케줄러 상태</h2>
+            <p>상태: <strong>{% if stats.scheduler.running %}🟢 실행 중{% else %}🔴 중지됨{% endif %}</strong></p>
+            {% if stats.scheduler.last_run %}
+            <p>마지막 실행: {{ stats.scheduler.last_run }}</p>
+            {% endif %}
+            <p style="margin-top: 10px; color: #666;">
+                스케줄러를 시작하려면: <code>python scripts/scheduler.py --start</code>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

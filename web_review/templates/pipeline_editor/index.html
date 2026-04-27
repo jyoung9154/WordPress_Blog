@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔗 파이프라인 에디터 - LangGraph + n8n 스타일</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1a1a2e;
+            color: #eee;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        /* 헤더 */
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 { font-size: 1.3rem; }
+        .header-actions { display: flex; gap: 10px; }
+        
+        /* 메인 레이아웃 */
+        .main-container {
+            display: flex;
+            height: calc(100vh - 60px);
+        }
+        
+        /* 사이드바 - 노드 팔레트 */
+        .sidebar {
+            width: 250px;
+            background: #16213e;
+            padding: 15px;
+            overflow-y: auto;
+            border-right: 1px solid #333;
+        }
+        .sidebar h3 {
+            font-size: 0.9rem;
+            color: #888;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+        .node-palette {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .palette-item {
+            background: #1f2937;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: grab;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        .palette-item:hover {
+            border-color: #667eea;
+            transform: translateX(5px);
+        }
+        .palette-item .node-icon { font-size: 1.2rem; margin-right: 8px; }
+        .palette-item .node-name { font-weight: bold; font-size: 0.9rem; }
+        .palette-item .node-desc { font-size: 0.75rem; color: #888; margin-top: 3px; }
+        
+        /* 캔버스 - 파이프라인 편집 영역 */
+        .canvas-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+        .canvas {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            background: 
+                radial-gradient(circle, #333 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        
+        /* SVG 레이어 - 연결선 */
+        .edges-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+        .edge {
+            fill: none;
+            stroke: #667eea;
+            stroke-width: 2;
+            pointer-events: stroke;
+            cursor: pointer;
+        }
+        .edge:hover { stroke: #764ba2; stroke-width: 3; }
+        .edge.selected { stroke: #4caf50; }
+        
+        /* 노드 */
+        .pipeline-node {
+            position: absolute;
+            background: #1f2937;
+            border-radius: 10px;
+            padding: 15px;
+            min-width: 180px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            cursor: move;
+            border: 2px solid transparent;
+            transition: border-color 0.2s;
+        }
+        .pipeline-node:hover { border-color: #667eea; }
+        .pipeline-node.selected { border-color: #4caf50; }
+        .pipeline-node .node-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .pipeline-node .node-icon { font-size: 1.3rem; margin-right: 8px; }
+        .pipeline-node .node-title { font-weight: bold; font-size: 0.95rem; }
+        .pipeline-node .node-body { font-size: 0.8rem; color: #888; }
+        .pipeline-node .node-status {
+            margin-top: 8px;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            text-align: center;
+        }
+        .node-status.pending { background: #374151; color: #888; }
+        .node-status.running { background: #fbbf24; color: #000; }
+        .node-status.success { background: #10b981; color: #fff; }
+        .node-status.error { background: #ef4444; color: #fff; }
+        
+        /* 입력/출력 포트 */
+        .port {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #667eea;
+            border: 2px solid #1f2937;
+        }
+        .port.input { left: -6px; top: 50%; transform: translateY(-50%); }
+        .port.output { right: -6px; top: 50%; transform: translateY(-50%); }
+        .port:hover { background: #4caf50; transform: translateY(-50%) scale(1.2); }
+        
+        /* 속성 패널 */
+        .properties-panel {
+            width: 300px;
+            background: #16213e;
+            padding: 15px;
+            overflow-y: auto;
+            border-left: 1px solid #333;
+            display: none;
+        }
+        .properties-panel.active { display: block; }
+        .properties-panel h3 {
+            font-size: 1rem;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #333;
+        }
+        .prop-group { margin-bottom: 15px; }
+        .prop-group label {
+            display: block;
+            font-size: 0.85rem;
+            color: #888;
+            margin-bottom: 5px;
+        }
+        .prop-group input, .prop-group select {
+            width: 100%;
+            padding: 8px;
+            background: #1f2937;
+            border: 1px solid #333;
+            border-radius: 5px;
+            color: #eee;
+            font-size: 0.9rem;
+        }
+        
+        /* 버튼 */
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        .btn-primary { background: #667eea; color: white; }
+        .btn-primary:hover { background: #5568d3; }
+        .btn-success { background: #10b981; color: white; }
+        .btn-success:hover { background: #059669; }
+        .btn-danger { background: #ef4444; color: white; }
+        .btn-secondary { background: #374151; color: #eee; }
+        
+        /* 실행 모달 */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal.active { display: flex; }
+        .modal-content {
+            background: #1f2937;
+            padding: 30px;
+            border-radius: 15px;
+            min-width: 400px;
+            max-width: 500px;
+        }
+        .modal-content h2 { margin-bottom: 20px; }
+        
+        /* 토스트 */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            background: #333;
+            color: white;
+            border-radius: 8px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 1001;
+        }
+        .toast.show { opacity: 1; }
+        .toast.success { background: #10b981; }
+        .toast.error { background: #ef4444; }
+        
+        /* 실행 로그 */
+        .run-log {
+            background: #0f0f1a;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 0.85rem;
+        }
+        .log-entry { margin-bottom: 5px; }
+        .log-entry.success { color: #10b981; }
+        .log-entry.error { color: #ef4444; }
+        .log-entry.info { color: #667eea; }
+        
+        /* 다익스트라 스타일 진행 시각화 */
+        .dijkstra-progress {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border: 1px solid #333;
+        }
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .progress-title {
+            font-size: 0.95rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+        .progress-percent {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #10b981;
+            font-family: monospace;
+        }
+        .progress-bar-container {
+            background: #0f0f1a;
+            border-radius: 10px;
+            height: 20px;
+            overflow: hidden;
+            margin-bottom: 15px;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.3);
+        }
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 50%, #10b981 100%);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            animation: shimmer 1.5s infinite;
+        }
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        .node-execution-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 250px;
+            overflow-y: auto;
+        }
+        .node-execution-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 15px;
+            background: #0f0f1a;
+            border-radius: 8px;
+            border-left: 4px solid #374151;
+            transition: all 0.3s ease;
+        }
+        .node-execution-item.pending {
+            border-left-color: #374151;
+            opacity: 0.6;
+        }
+        .node-execution-item.running {
+            border-left-color: #fbbf24;
+            background: linear-gradient(90deg, rgba(251,191,36,0.1), transparent);
+            animation: pulse 1s infinite;
+        }
+        .node-execution-item.completed {
+            border-left-color: #10b981;
+            background: linear-gradient(90deg, rgba(16,185,129,0.1), transparent);
+        }
+        .node-execution-item.error {
+            border-left-color: #ef4444;
+            background: linear-gradient(90deg, rgba(239,68,68,0.1), transparent);
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        .node-step {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+            background: #374151;
+            color: #888;
+            flex-shrink: 0;
+        }
+        .node-execution-item.running .node-step {
+            background: #fbbf24;
+            color: #000;
+        }
+        .node-execution-item.completed .node-step {
+            background: #10b981;
+            color: #fff;
+        }
+        .node-execution-item.error .node-step {
+            background: #ef4444;
+            color: #fff;
+        }
+        .node-icon-small {
+            font-size: 1.2rem;
+        }
+        .node-info {
+            flex: 1;
+        }
+        .node-name-small {
+            font-weight: bold;
+            font-size: 0.9rem;
+            color: #eee;
+        }
+        .node-message {
+            font-size: 0.8rem;
+            color: #888;
+            margin-top: 2px;
+        }
+        .node-status-badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+        .node-status-badge.pending { background: #374151; color: #888; }
+        .node-status-badge.running { background: #fbbf24; color: #000; }
+        .node-status-badge.completed { background: #10b981; color: #fff; }
+        .node-status-badge.error { background: #ef4444; color: #fff; }
+        </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🔗 파이프라인 에디터</h1>
+        <div class="header-actions">
+            <button class="btn btn-secondary" onclick="savePipeline()">💾 저장</button>
+            <button class="btn btn-primary" onclick="showRunModal()">▶️ 실행</button>
+        </div>
+    </div>
+    
+    <div class="main-container">
+        <!-- 사이드바: 노드 팔레트 -->
+        <div class="sidebar">
+            <h3>📦 노드 팔레트</h3>
+            <div class="node-palette" id="nodePalette">
+                {% for node in default_nodes %}
+                <div class="palette-item" draggable="true" data-node-type="{{ node.type }}">
+                    <span class="node-icon">{{ node.icon }}</span>
+                    <span class="node-name">{{ node.name }}</span>
+                    <div class="node-desc">{{ node.description }}</div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <h3 style="margin-top: 20px;">📁 저장된 파이프라인</h3>
+            <div id="pipelineList">
+                {% for p in pipelines %}
+                <div class="palette-item" onclick="loadPipeline('{{ p.name }}')">
+                    <span class="node-name">{{ p.name }}</span>
+                    <div class="node-desc">{{ p.node_count }}개 노드</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- 캔버스 -->
+        <div class="canvas-container">
+            <div class="canvas" id="canvas">
+                <svg class="edges-layer" id="edgesLayer">
+                    <defs>
+                        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" fill="#667eea"/>
+                        </marker>
+                    </defs>
+                </svg>
+                <!-- 노드들이 여기에 동적으로 생성됨 -->
+            </div>
+        </div>
+        
+        <!-- 속성 패널 -->
+        <div class="properties-panel" id="propertiesPanel">
+            <h3>⚙️ 노드 설정</h3>
+            <div id="nodeProperties"></div>
+            <button class="btn btn-danger" style="margin-top: 15px; width: 100%;" onclick="deleteSelectedNode()">🗑️ 노드 삭제</button>
+        </div>
+    </div>
+    
+    <!-- 실행 모달 -->
+    <div class="modal" id="runModal">
+    <div class="modal-content" style="max-width: 700px;">
+    <h2>▶️ 파이프라인 실행</h2>
+    
+    <!-- 다익스트라 스타일 진행 시각화 -->
+    <div class="dijkstra-progress" id="dijkstraProgress">
+    <div class="progress-header">
+    <span class="progress-title">🔄 다익스트라 알고리즘 진행 상황</span>
+    <span class="progress-percent" id="progressPercent">0%</span>
+    </div>
+    <div class="progress-bar-container">
+    <div class="progress-bar" id="progressBar"></div>
+    </div>
+    <div class="node-execution-list" id="nodeExecutionList"></div>
+    </div>
+    
+    <div class="prop-group" style="margin-top: 20px;">
+    <label>메인 키워드</label>
+    <input type="text" id="mainKeyword" placeholder="예: AI investing tips 2026">
+    </div>
+    <div class="prop-group">
+    <label>설정</label>
+    <label style="display: flex; align-items: center; gap: 8px; margin-top: 5px;">
+    <input type="checkbox" id="autoApprove"> 자동 승인 (흥미도 60점 이상)
+    </label>
+    </div>
+    <div style="display: flex; gap: 10px; margin-top: 20px;">
+    <button class="btn btn-success" id="runBtn" onclick="runPipeline()">▶️ 실행</button>
+    <button class="btn btn-secondary" onclick="hideRunModal()">취소</button>
+    </div>
+    <div class="run-log" id="runLog"></div>
+    </div>
+    </div>
+    
+    <div id="toast" class="toast"></div>
+
+    <script>
+        // =====================================================================
+        // 상태 관리
+        // =====================================================================
+        let currentPipeline = {{ pipeline | tojson | safe }};
+        let selectedNode = null;
+        let nodePositions = {};
+        let isDragging = false;
+        let dragNode = null;
+        let dragOffset = { x: 0, y: 0 };
+        
+        // =====================================================================
+        // 초기화
+        // =====================================================================
+        document.addEventListener('DOMContentLoaded', () => {
+            initCanvas();
+            renderNodes();
+            renderEdges();
+            setupDragAndDrop();
+        });
+        
+        // =====================================================================
+        // 캔버스 초기화
+        // =====================================================================
+        function initCanvas() {
+            const canvas = document.getElementById('canvas');
+            
+            // 초기 노드 위치 설정
+            const startY = 50;
+            const spacing = 120;
+            
+            currentPipeline.nodes.forEach((node, index) => {
+                if (!nodePositions[node.id]) {
+                    nodePositions[node.id] = {
+                        x: 100,
+                        y: startY + (index * spacing)
+                    };
+                }
+            });
+        }
+        
+        // =====================================================================
+        // 노드 렌더링
+        // =====================================================================
+        function renderNodes() {
+            const canvas = document.getElementById('canvas');
+            
+            // 기존 노드 제거 (SVG 제외)
+            canvas.querySelectorAll('.pipeline-node').forEach(n => n.remove());
+            
+            currentPipeline.nodes.forEach(node => {
+                const pos = nodePositions[node.id] || { x: 100, y: 100 };
+                
+                const nodeEl = document.createElement('div');
+                nodeEl.className = 'pipeline-node';
+                nodeEl.id = `node-${node.id}`;
+                nodeEl.style.left = `${pos.x}px`;
+                nodeEl.style.top = `${pos.y}px`;
+                nodeEl.style.borderColor = node.color || '#667eea';
+                
+                nodeEl.innerHTML = `
+                    <div class="port input" data-node="${node.id}" data-type="input"></div>
+                    <div class="node-header">
+                        <span class="node-icon">${node.icon}</span>
+                        <span class="node-title">${node.name}</span>
+                    </div>
+                    <div class="node-body">${node.description}</div>
+                    <div class="node-status pending">대기</div>
+                    <div class="port output" data-node="${node.id}" data-type="output"></div>
+                `;
+                
+                // 클릭 이벤트
+                nodeEl.addEventListener('click', (e) => {
+                    if (!isDragging) selectNode(node.id);
+                });
+                
+                // 드래그 이벤트
+                nodeEl.addEventListener('mousedown', (e) => {
+                    if (e.target.classList.contains('port')) return;
+                    startDrag(e, node.id);
+                });
+                
+                canvas.appendChild(nodeEl);
+            });
+        }
+        
+        // =====================================================================
+        // 엣지(연결선) 렌더링
+        // =====================================================================
+        function renderEdges() {
+            const svg = document.getElementById('edgesLayer');
+            
+            // 기존 엣지 제거
+            svg.querySelectorAll('.edge').forEach(e => e.remove());
+            
+            currentPipeline.edges.forEach(edge => {
+                const fromPos = nodePositions[edge.from];
+                const toPos = nodePositions[edge.to];
+                
+                if (!fromPos || !toPos) return;
+                
+                // 노드 크기估算
+                const nodeWidth = 180;
+                const nodeHeight = 80;
+                
+                // 시작/끝 점 계산
+                const x1 = fromPos.x + nodeWidth;
+                const y1 = fromPos.y + nodeHeight / 2;
+                const x2 = toPos.x;
+                const y2 = toPos.y + nodeHeight / 2;
+                
+                // 베지어 커브 경로
+                const midX = (x1 + x2) / 2;
+                const path = `M ${x1} ${y1} C ${midX} ${y1}, ${midX} ${y2}, ${x2} ${y2}`;
+                
+                const edgeEl = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                edgeEl.setAttribute('class', 'edge');
+                edgeEl.setAttribute('d', path);
+                edgeEl.setAttribute('marker-end', 'url(#arrowhead)');
+                edgeEl.dataset.from = edge.from;
+                edgeEl.dataset.to = edge.to;
+                
+                svg.appendChild(edgeEl);
+            });
+        }
+        
+        // =====================================================================
+        // 드래그 앤 드롭 (사이드바 → 캔버스)
+        // =====================================================================
+        function setupDragAndDrop() {
+            const palette = document.getElementById('nodePalette');
+            const canvas = document.getElementById('canvas');
+            
+            // 팔레트 아이템 드래그 시작
+            palette.querySelectorAll('.palette-item').forEach(item => {
+                item.addEventListener('dragstart', (e) => {
+                    e.dataTransfer.setData('nodeType', item.dataset.nodeType);
+                });
+            });
+            
+            // 캔버스에 드롭
+            canvas.addEventListener('dragover', (e) => {
+                e.preventDefault();
+            });
+            
+            canvas.addEventListener('drop', (e) => {
+                e.preventDefault();
+                const nodeType = e.dataTransfer.getData('nodeType');
+                if (!nodeType) return;
+                
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left - 90; // 노드 너비 보정
+                const y = e.clientY - rect.top - 40;
+                
+                addNodeToCanvas(nodeType, x, y);
+            });
+        }
+        
+        function addNodeToCanvas(nodeType, x, y) {
+            // 기본 노드 템플릿에서 찾기
+            const defaultNodes = {{ default_nodes | tojson | safe }};
+            const template = defaultNodes.find(n => n.type === nodeType);
+            
+            if (!template) return;
+            
+            // 새 노드 생성
+            const newNode = {
+                ...template,
+                id: `node_${Date.now()}`
+            };
+            
+            currentPipeline.nodes.push(newNode);
+            nodePositions[newNode.id] = { x, y };
+            
+            renderNodes();
+            renderEdges();
+            showToast('노드가 추가되었습니다', 'success');
+        }
+        
+        // =====================================================================
+        // 노드 드래그 (캔버스 내 이동)
+        // =====================================================================
+        function startDrag(e, nodeId) {
+            isDragging = true;
+            dragNode = nodeId;
+            
+            const pos = nodePositions[nodeId];
+            const rect = e.target.closest('.pipeline-node').getBoundingClientRect();
+            const canvasRect = document.getElementById('canvas').getBoundingClientRect();
+            
+            dragOffset = {
+                x: e.clientX - rect.left,
+                y: e.clientY - rect.top
+            };
+            
+            document.addEventListener('mousemove', onDrag);
+            document.addEventListener('mouseup', endDrag);
+        }
+        
+        function onDrag(e) {
+            if (!isDragging || !dragNode) return;
+            
+            const canvas = document.getElementById('canvas');
+            const rect = canvas.getBoundingClientRect();
+            
+            let x = e.clientX - rect.left - dragOffset.x;
+            let y = e.clientY - rect.top - dragOffset.y;
+            
+            // 범위 제한
+            x = Math.max(0, x);
+            y = Math.max(0, y);
+            
+            nodePositions[dragNode] = { x, y };
+            
+            // 노드 위치 업데이트
+            const nodeEl = document.getElementById(`node-${dragNode}`);
+            if (nodeEl) {
+                nodeEl.style.left = `${x}px`;
+                nodeEl.style.top = `${y}px`;
+            }
+            
+            // 엣지 다시 그리기
+            renderEdges();
+        }
+        
+        function endDrag() {
+            isDragging = false;
+            dragNode = null;
+            document.removeEventListener('mousemove', onDrag);
+            document.removeEventListener('mouseup', endDrag);
+        }
+        
+        // =====================================================================
+        // 노드 선택 및 속성 패널
+        // =====================================================================
+        function selectNode(nodeId) {
+            // 이전 선택 해제
+            document.querySelectorAll('.pipeline-node').forEach(n => n.classList.remove('selected'));
+            
+            // 새 선택
+            const nodeEl = document.getElementById(`node-${nodeId}`);
+            if (nodeEl) nodeEl.classList.add('selected');
+            
+            selectedNode = currentPipeline.nodes.find(n => n.id === nodeId);
+            
+            // 속성 패널 표시
+            showPropertiesPanel(selectedNode);
+        }
+        
+        function showPropertiesPanel(node) {
+            const panel = document.getElementById('propertiesPanel');
+            const propsDiv = document.getElementById('nodeProperties');
+            
+            panel.classList.add('active');
+            
+            propsDiv.innerHTML = `
+                <div class="prop-group">
+                    <label>노드 이름</label>
+                    <input type="text" id="propName" value="${node.name}" onchange="updateNodeProp('name', this.value)">
+                </div>
+                <div class="prop-group">
+                    <label>설명</label>
+                    <input type="text" id="propDesc" value="${node.description}" onchange="updateNodeProp('description', this.value)">
+                </div>
+                <div class="prop-group">
+                    <label>색상</label>
+                    <input type="color" id="propColor" value="${node.color || '#667eea'}" onchange="updateNodeProp('color', this.value)">
+                </div>
+                <h4 style="margin: 15px 0 10px; font-size: 0.9rem;">설정</h4>
+                ${Object.entries(node.config || {}).map(([key, value]) => `
+                    <div class="prop-group">
+                        <label>${key}</label>
+                        <input type="text" value="${value}" onchange="updateNodeConfig('${key}', this.value)">
+                    </div>
+                `).join('')}
+            `;
+        }
+        
+        function updateNodeProp(prop, value) {
+            if (!selectedNode) return;
+            selectedNode[prop] = value;
+            renderNodes();
+        }
+        
+        function updateNodeConfig(key, value) {
+            if (!selectedNode) return;
+            if (!selectedNode.config) selectedNode.config = {};
+            selectedNode.config[key] = value;
+        }
+        
+        function deleteSelectedNode() {
+            if (!selectedNode) return;
+            
+            // 연결된 엣지 भी 삭제
+            currentPipeline.edges = currentPipeline.edges.filter(
+                e => e.from !== selectedNode.id && e.to !== selectedNode.id
+            );
+            
+            // 노드 삭제
+            currentPipeline.nodes = currentPipeline.nodes.filter(n => n.id !== selectedNode.id);
+            delete nodePositions[selectedNode.id];
+            
+            // UI 업데이트
+            document.getElementById('propertiesPanel').classList.remove('active');
+            selectedNode = null;
+            renderNodes();
+            renderEdges();
+            showToast('노드가 삭제되었습니다', 'success');
+        }
+        
+        // =====================================================================
+        // 파이프라인 저장/로드
+        // =====================================================================
+        function savePipeline() {
+            const pipelineData = {
+                ...currentPipeline,
+                nodes: currentPipeline.nodes.map(n => ({
+                    ...n,
+                    position: nodePositions[n.id]
+                }))
+            };
+            
+            fetch('/api/pipeline', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(pipelineData)
+            })
+            .then(res => res.json())
+            .then(data => {
+                showToast(data.message || '저장 완료', 'success');
+            })
+            .catch(err => {
+                showToast('저장 실패', 'error');
+            });
+        }
+        
+        function loadPipeline(name) {
+            fetch(`/api/pipeline?name=${name}`)
+            .then(res => res.json())
+            .then(data => {
+                currentPipeline = data;
+                
+                // 위치 복원
+                data.nodes.forEach(n => {
+                    if (n.position) {
+                        nodePositions[n.id] = n.position;
+                    }
+                });
+                
+                renderNodes();
+                renderEdges();
+                showToast(`파이프라인 "${name}" 로드됨`, 'success');
+            });
+        }
+        
+        // =====================================================================
+        // 파이프라인 실행
+        // =====================================================================
+        function showRunModal() {
+            document.getElementById('runModal').classList.add('active');
+        }
+        
+        function hideRunModal() {
+            document.getElementById('runModal').classList.remove('active');
+        }
+        
+        function runPipeline() {
+        const mainKeyword = document.getElementById('mainKeyword').value;
+        const autoApprove = document.getElementById('autoApprove').checked;
+        
+        if (!mainKeyword) {
+        showToast('메인 키워드를 입력하세요', 'error');
+        return;
+        }
+        
+        // UI 초기화
+        const logDiv = document.getElementById('runLog');
+        logDiv.innerHTML = '<div class="log-entry info">🚀 SSE 스트리밍 시작...</div>';
+        document.getElementById('progressPercent').textContent = '0%';
+        document.getElementById('progressBar').style.width = '0%';
+        document.getElementById('nodeExecutionList').innerHTML = '';
+        
+        // 실행 버튼 비활성화
+        document.getElementById('runBtn').disabled = true;
+        document.getElementById('runBtn').textContent = '🔄 실행중...';
+        
+        // SSE로 다익스트라 스타일 실시간 진행 표시
+        const eventSource = new EventSource('/api/pipeline/run-stream', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+        main_keyword: mainKeyword,
+        config: { auto_approve: autoApprove },
+        nodes: currentPipeline.nodes,
+        edges: currentPipeline.edges
+        })
+        });
+        
+        // SSE는 POST를 직접 지원하지 않으므로 일반 fetch + ReadableStream 사용
+        runPipelineWithFetch(mainKeyword, autoApprove);
+        }
+        
+        async function runPipelineWithFetch(mainKeyword, autoApprove) {
+        const logDiv = document.getElementById('runLog');
+        let nodeOrder = [];
+        let currentStep = 0;
+        
+        try {
+        const response = await fetch('/api/pipeline/run-stream', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+        main_keyword: mainKeyword,
+        config: { auto_approve: autoApprove },
+        nodes: currentPipeline.nodes,
+        edges: currentPipeline.edges
+        })
+        });
+        
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+        
+        while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop();
+        
+        for (const line of lines) {
+        if (line.startsWith('event: ')) {
+        const eventType = line.replace('event: ', '').trim();
+        } else if (line.startsWith('data: ')) {
+        const jsonStr = line.replace('data: ', '').trim();
+        try {
+        const data = JSON.parse(jsonStr);
+        handleSSEMessage(data, nodeOrder, currentStep, logDiv, (order, step) => {
+        nodeOrder = order;
+        currentStep = step;
+        });
+        } catch (e) {
+        console.error('JSON parse error:', e);
+        }
+        }
+        }
+        }
+        } catch (err) {
+        logDiv.innerHTML += `<div class="log-entry error">❌ 오류: ${err}</div>`;
+        document.getElementById('runBtn').disabled = false;
+        document.getElementById('runBtn').textContent = '▶️ 실행';
+        showToast('실행 중 오류 발생', 'error');
+        }
+        }
+        
+        function handleSSEMessage(data, nodeOrder, currentStep, logDiv, updateCallback) {
+        const progressBar = document.getElementById('progressBar');
+        const progressPercent = document.getElementById('progressPercent');
+        const nodeList = document.getElementById('nodeExecutionList');
+        
+        switch (data.type) {
+        case 'init':
+        logDiv.innerHTML += `<div class="log-entry info">🔄 ${data.message}</div>`;
+        break;
+        
+        case 'node_order':
+        updateCallback(data.order, 0);
+        logDiv.innerHTML += `<div class="log-entry info">📋 노드 실행 순서 결정: ${data.total_nodes}개 노드</div>`;
+        // 노드 목록 초기화
+        nodeList.innerHTML = '';
+        data.order.forEach((nodeId, idx) => {
+        const node = currentPipeline.nodes.find(n => n.id === nodeId);
+        if (node) {
+        const item = document.createElement('div');
+        item.className = 'node-execution-item pending';
+        item.id = `node-item-${nodeId}`;
+        item.innerHTML = `
+        <div class="node-step">${idx + 1}</div>
+        <div class="node-icon-small">${node.icon}</div>
+        <div class="node-info">
+        <div class="node-name-small">${node.name}</div>
+        <div class="node-message">대기중...</div>
+        </div>
+        <div class="node-status-badge pending">대기</div>
+        `;
+        nodeList.appendChild(item);
+        }
+        });
+        break;
+        
+        case 'node_start':
+        const startItem = document.getElementById(`node-item-${data.node_id}`);
+        if (startItem) {
+        startItem.className = 'node-execution-item running';
+        startItem.querySelector('.node-message').textContent = data.message;
+        startItem.querySelector('.node-status-badge').className = 'node-status-badge running';
+        startItem.querySelector('.node-status-badge').textContent = '실행중';
+        }
+        // 진행률 업데이트
+        progressBar.style.width = `${data.progress}%`;
+        progressPercent.textContent = `${data.progress}%`;
+        logDiv.innerHTML += `<div class="log-entry info">▶️ [${data.step}/${data.total_steps}] ${data.node_name} - ${data.message}</div>`;
+        break;
+        
+        case 'node_complete':
+        const completeItem = document.getElementById(`node-item-${data.node_id}`);
+        if (completeItem) {
+        completeItem.className = 'node-execution-item completed';
+        completeItem.querySelector('.node-message').textContent = data.message;
+        completeItem.querySelector('.node-status-badge').className = 'node-status-badge completed';
+        completeItem.querySelector('.node-status-badge').textContent = '완료';
+        }
+        // 진행률 업데이트
+        progressBar.style.width = `${data.progress}%`;
+        progressPercent.textContent = `${data.progress}%`;
+        logDiv.innerHTML += `<div class="log-entry success">✅ [${data.step}/${data.total_steps}] ${data.node_name} - ${data.message} (${data.output})</div>`;
+        break;
+        
+        case 'complete':
+        progressBar.style.width = '100%';
+        progressPercent.textContent = '100%';
+        logDiv.innerHTML += `<div class="log-entry success">🎉 ${data.message}</div>`;
+        logDiv.innerHTML += `<div class="log-entry">📊 총 ${data.summary.total_nodes}개 노드 실행</div>`;
+        logDiv.innerHTML += `<div class="log-entry">⏱️ 실행 시간: ${data.summary.execution_time}</div>`;
+        
+        // 모든 노드 완료 표시
+        document.querySelectorAll('.node-execution-item.running').forEach(el => {
+        el.className = 'node-execution-item completed';
+        el.querySelector('.node-status-badge').className = 'node-status-badge completed';
+        el.querySelector('.node-status-badge').textContent = '완료';
+        });
+        
+        // 버튼 복원
+        document.getElementById('runBtn').disabled = false;
+        document.getElementById('runBtn').textContent = '▶️ 실행';
+        showToast('파이프라인 실행 완료!', 'success');
+        break;
+        
+        case 'error':
+        logDiv.innerHTML += `<div class="log-entry error">❌ 오류: ${data.message}</div>`;
+        // 버튼 복원
+        document.getElementById('runBtn').disabled = false;
+        document.getElementById('runBtn').textContent = '▶️ 실행';
+        showToast('실행 중 오류 발생', 'error');
+        break;
+        }
+        
+        // 스크롤 자동 이동
+        logDiv.scrollTop = logDiv.scrollHeight;
+        }
+        
+        function updateNodeStatus(nodeId, status) {
+        if (nodeId === 'all') {
+        document.querySelectorAll('.node-status').forEach(el => {
+        el.className = `node-status ${status}`;
+        el.textContent = status === 'running' ? '실행중' : status === 'success' ? '완료' : '실패';
+        });
+        }
+        }
+        
+        // =====================================================================
+        // 유틸리티
+        // =====================================================================
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast show ${type}`;
+            setTimeout(() => toast.className = 'toast', 3000);
+        }
+    </script>
+</body>
+</html>

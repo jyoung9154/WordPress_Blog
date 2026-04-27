@@ -1,0 +1,8 @@
+# 이 폴더에는 로그 파일이 저장됩니다.
+# - generate_post.log: AI 글 생성 로그
+# - seo_optimizer.log: SEO 최적화 로그
+# - review_queue.log: 검토 노드 로그
+# - wp_publisher.log: WordPress 발행 로그
+# - affiliate_inserter.log: 제휴링크 삽입 로그
+# - scheduler_status.json: 스케줄러 상태
+# - review_log.json: 검토 이력
