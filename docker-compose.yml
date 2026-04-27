@@ -143,6 +143,8 @@ services:
   - "5002:5002"
   networks:
   - blog_network
+  extra_hosts:
+  - "host.docker.internal:host-gateway"
   depends_on:
   - wordpress
   healthcheck:
@@ -183,6 +185,8 @@ services:
   - "5000:5000"
   networks:
   - blog_network
+  extra_hosts:
+  - "host.docker.internal:host-gateway"
   depends_on:
   - wordpress
   healthcheck:
@@ -223,6 +227,8 @@ services:
   - "5001:5000"
   networks:
   - blog_network
+  extra_hosts:
+  - "host.docker.internal:host-gateway"
   depends_on:
   - wordpress
   healthcheck:
