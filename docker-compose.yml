@@ -268,12 +268,12 @@ services:
 # 볼륨 정의 (데이터 영속성)
 # ==============================================================================
 volumes:
-wordpress_data:
-driver: local
-mysql_data:
-driver: local
-redis_data:
-driver: local
+  wordpress_data:
+    driver: local
+  mysql_data:
+    driver: local
+  redis_data:
+    driver: local
 
 # ==============================================================================
 # 네트워크 정의
