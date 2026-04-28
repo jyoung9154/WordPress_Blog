@@ -405,15 +405,12 @@ class MultiAIClient:
         
         if response.status_code == 200:
             result = response.json()
-            # LiteLLM이thinking을返す場合がある
-            content = result.get("choices", [{}])[0].get("message", {}).get("content", "")
-            if isinstance(content, list):
-                # contentがリストの場合（thinking + text）
-                for item in content:
-                    if item.get("type") == "text":
-                        return item.get("text", "")
-                return str(content)
-            return content
+            # LiteLLM returns Anthropic format: {"content": [{"type": "text", "text": "..."}]}
+            content_list = result.get("content", [])
+            for item in content_list:
+                if item.get("type") == "text":
+                    return item.get("text", "")
+            return ""
         else:
             raise Exception(f"LiteLLM API 오류: {response.status_code} - {response.text}")
 
