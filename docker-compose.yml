@@ -142,6 +142,7 @@ services:
       - ./config:/app/config
       - ./logs:/app/logs
       - ./output:/app/output
+      - ./scripts:/app/scripts
     ports:
       - "5002:5000"
     networks:
@@ -185,6 +186,7 @@ services:
       - ./config:/app/config
       - ./logs:/app/logs
       - ./output:/app/output
+      - ./scripts:/app/scripts
     ports:
       - "5000:5000"
     networks:
@@ -228,6 +230,7 @@ services:
       - ./config:/app/config
       - ./logs:/app/logs
       - ./output:/app/output
+      - ./scripts:/app/scripts
     ports:
       - "5001:5000"
     networks:
