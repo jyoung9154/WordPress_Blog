@@ -21,6 +21,8 @@ services:
       WORDPRESS_DB_PASSWORD: ${MYSQL_PASSWORD}
       WORDPRESS_DB_NAME: ${MYSQL_DATABASE}
       TZ: Asia/Seoul
+      # HTTP 환경에서도 REST API 애플리케이션 비밀번호 허용
+      WP_ENVIRONMENT_TYPE: development
     volumes:
       - wordpress_data:/var/www/html
     ports:
