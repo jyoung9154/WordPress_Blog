@@ -35,5 +35,5 @@ EXPOSE 5000 5001 5002
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:5000/health || exit 1
 
-# 실행 명령 - FLASK_APP 환경변수를 사용하여 동적으로 Flask 앱 로드
-CMD ["sh", "-c", "python -c 'from ${FLASK_APP} import app; app.run(host=\"0.0.0.0\", port=5000)'"]
+# 실행 명령 - 각 서비스에서 command로 오버라이드됨
+CMD ["python", "-c", "from web_review.app import app; app.run(host='0.0.0.0', port=5000)"]

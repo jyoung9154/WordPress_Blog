@@ -120,6 +120,7 @@ services:
       dockerfile: Dockerfile.webapp
     container_name: blog_pipeline_editor
     restart: unless-stopped
+    command: ["python", "-c", "from web_review.pipeline_editor import app; app.run(host='0.0.0.0', port=5000)"]
     environment:
       - FLASK_APP=web_review/pipeline_editor.py
       - FLASK_ENV=production
@@ -162,6 +163,7 @@ services:
       dockerfile: Dockerfile.webapp
     container_name: blog_admin_dashboard
     restart: unless-stopped
+    command: ["python", "-c", "from web_review.admin import app; app.run(host='0.0.0.0', port=5000)"]
     environment:
       - FLASK_APP=web_review/admin.py
       - FLASK_ENV=production
@@ -204,6 +206,7 @@ services:
       dockerfile: Dockerfile.webapp
     container_name: blog_review_dashboard
     restart: unless-stopped
+    command: ["python", "-c", "from web_review.app import app; app.run(host='0.0.0.0', port=5000)"]
     environment:
       - FLASK_APP=web_review/app.py
       - FLASK_ENV=production
