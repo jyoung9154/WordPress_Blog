@@ -13,6 +13,7 @@ import os
 import json
 import argparse
 import random
+from datetime import datetime
 from pathlib import Path
 
 # scripts 폴더 내의 common.py를 임포트하기 위해 경로 추가
