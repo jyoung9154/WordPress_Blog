@@ -190,7 +190,7 @@ services:
     depends_on:
       - wordpress
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5000/admin"]
+      test: ["CMD", "curl", "-f", "http://localhost:5000/"]
       interval: 30s
       timeout: 10s
       retries: 3
