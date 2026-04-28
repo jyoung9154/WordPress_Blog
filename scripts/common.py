@@ -386,15 +386,36 @@ class MultiAIClient:
             messages.append({"role": "system", "content": system_prompt})
         messages.append({"role": "user", "content": prompt})
         
-        response = provider_info["client"](
-            model=provider_info["model"],
-            messages=messages,
-            api_base=provider_info["base_url"],
-            max_tokens=kwargs.get("max_tokens", 8192),
-            temperature=kwargs.get("temperature", 0.7)
+        import requests
+        
+        response = requests.post(
+            f"{provider_info['base_url']}/v1/messages",
+            headers={
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            },
+            json={
+                "model": provider_info["model"],
+                "messages": messages,
+                "max_tokens": kwargs.get("max_tokens", 8192),
+                "temperature": kwargs.get("temperature", 0.7)
+            },
+            timeout=120
         )
         
-        return response.choices[0].message.content
+        if response.status_code == 200:
+            result = response.json()
+            # LiteLLM이thinking을返す場合がある
+            content = result.get("choices", [{}])[0].get("message", {}).get("content", "")
+            if isinstance(content, list):
+                # contentがリストの場合（thinking + text）
+                for item in content:
+                    if item.get("type") == "text":
+                        return item.get("text", "")
+                return str(content)
+            return content
+        else:
+            raise Exception(f"LiteLLM API 오류: {response.status_code} - {response.text}")
 
 # ==============================================================================
 # AI 클라이언트 인스턴스 (전역)
