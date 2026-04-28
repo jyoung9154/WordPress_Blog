@@ -22,7 +22,7 @@ from common import (
     setup_logging,
     load_json,
     save_json,
-    get_claude_client,
+    get_ai_client,
     generate_timestamp,
     sanitize_filename,
     ROOT_DIR
@@ -216,9 +216,9 @@ def generate_post(keyword_info: dict) -> dict:
     # 프롬프트 구성
     prompt = build_prompt(keyword_info, prompts_data)
     
-    # Claude API 클라이언트 가져오기
-    client = get_claude_client()
-    model = os.getenv("CLAUDE_MODEL", DEFAULT_MODEL)
+    # AI 클라이언트 가져오기
+    client = get_ai_client()
+    model = os.getenv("LITELLM_MODEL", DEFAULT_MODEL)
     
     # 재시도 로직
     for attempt in range(MAX_RETRIES):
