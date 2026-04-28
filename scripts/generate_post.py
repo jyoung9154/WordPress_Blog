@@ -218,25 +218,19 @@ def generate_post(keyword_info: dict) -> dict:
     
     # AI 클라이언트 가져오기
     client = get_ai_client()
-    model = os.getenv("LITELLM_MODEL", DEFAULT_MODEL)
     
     # 재시도 로직
     for attempt in range(MAX_RETRIES):
         try:
             logger.info(f"API 요청 시도 {attempt + 1}/{MAX_RETRIES}")
             
-            response = client.messages.create(
-                model=model,
+            # MultiAIClient의 generate 메서드 사용
+            response_text = client.generate(
+                prompt=prompt,
+                system_prompt="You are an expert financial content writer. Return only valid JSON.",
                 max_tokens=8192,
-                temperature=0.7,
-                system="You are an expert financial content writer. Return only valid JSON.",
-                messages=[
-                    {"role": "user", "content": prompt}
-                ]
-            )
-            
-            # 응답 텍스트 추출
-            response_text = response.content[0].text.strip()
+                temperature=0.7
+            ).strip()
             
             # JSON 파싱
             # Markdown 코드 블록 제거 (```json ... ```)
